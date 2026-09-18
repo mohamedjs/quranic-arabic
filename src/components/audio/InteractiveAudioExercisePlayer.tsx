@@ -6,6 +6,7 @@ import confetti from 'canvas-confetti';
 import { useAudioPlayer } from '@/hooks/useAudioPlayer';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { Exercise, ExerciseOption } from '@/types/database.types';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 export interface InteractiveAudioExercisePlayerProps {
   exercise: Exercise;
@@ -20,6 +21,7 @@ export const InteractiveAudioExercisePlayer: React.FC<InteractiveAudioExercisePl
   onNext,
   autoPlayAudio = false,
 }) => {
+  const { language, t, getLocalized, dir } = useLanguage();
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
   const [status, setStatus] = useState<'unanswered' | 'correct' | 'incorrect'>('unanswered');
   const [speed, setSpeed] = useState<number>(1.0);
@@ -124,38 +126,53 @@ export const InteractiveAudioExercisePlayer: React.FC<InteractiveAudioExercisePl
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [status, selectedOptionId, exercise.options_json, play, handleCheckAnswer, onNext]);
 
+  // Multilingual content retrieval
+  const localizedQuestion = getLocalized(exercise, 'question') || exercise.question_text;
+  const localizedExplanation = getLocalized(exercise, 'explanation') || exercise.explanation;
+  const localizedTranslation = getLocalized(exercise, 'translation') || exercise.translation;
+
   return (
-    <div className="w-full max-w-2xl mx-auto bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden flex flex-col transition-all duration-300">
+    <div className="w-full max-w-2xl mx-auto bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden flex flex-col transition-all duration-300" dir={dir}>
       {/* Top Header: Question Prompt */}
       <div className="p-6 md:p-8 bg-gradient-to-b from-slate-50/80 to-white border-b border-slate-100">
         <div className="flex items-center justify-between mb-3">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-emerald-100 text-emerald-800">
             <Sparkles className="w-3.5 h-3.5" />
-            Phonetic Recognition (تمييز الأصوات)
+            <span>{t('session.badge')}</span>
           </span>
 
           {/* Audio Speed Switcher (0.75x / 1.0x) */}
           <button
             type="button"
             onClick={handleToggleSpeed}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border border-slate-200 bg-white hover:bg-slate-50 transition-colors shadow-sm text-slate-700 cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border border-slate-200 bg-white hover:bg-slate-50 transition-colors shadow-xs text-slate-700 cursor-pointer"
             title="Toggle Recitation Speed (Key: S)"
           >
             <Gauge className="w-3.5 h-3.5 text-slate-500" />
-            <span>Speed:</span>
+            <span>{t('session.speed')}</span>
             <span className={`font-bold ${speed === 0.75 ? 'text-amber-600' : 'text-emerald-600'}`}>
-              {speed === 0.75 ? '0.75x (بطيء)' : '1.0x (عادي)'}
+              {speed === 0.75 ? t('session.speed_slow') : t('session.speed_normal')}
             </span>
           </button>
         </div>
 
-        <h2 className="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">
-          {exercise.question_text}
+        <h2 className="text-xl md:text-2xl font-bold text-slate-800 tracking-tight leading-snug">
+          {localizedQuestion}
         </h2>
-        {exercise.transliteration && (
-          <p className="text-sm text-slate-500 mt-1 italic">
-            Hint: Listen for &quot;{exercise.transliteration}&quot;
-          </p>
+
+        {(exercise.transliteration || localizedTranslation) && (
+          <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+            {exercise.transliteration && (
+              <span className="bg-slate-100 px-2.5 py-1 rounded-md font-mono text-slate-600">
+                🔊 {exercise.transliteration}
+              </span>
+            )}
+            {localizedTranslation && (
+              <span className="text-slate-600 italic">
+                {t('session.hint')} &ldquo;{localizedTranslation}&rdquo;
+              </span>
+            )}
+          </div>
         )}
       </div>
 
@@ -185,26 +202,30 @@ export const InteractiveAudioExercisePlayer: React.FC<InteractiveAudioExercisePl
         </div>
 
         <p className="text-xs text-slate-500 mt-4 flex items-center gap-1.5 font-medium">
-          <span>اضغط</span>
-          <kbd className="px-2 py-0.5 rounded bg-slate-100 border border-slate-300 text-[11px] font-mono text-slate-600 shadow-xs">
-            Space
-          </kbd>
-          <span>أو انقر على الزر لسماع الصوت</span>
+          <span>{t('session.play_audio')}</span>
         </p>
 
         {isPlaying && (
           <span className="mt-2 text-xs font-semibold text-emerald-600 animate-pulse">
-            جاري تشغيل الصوت...
+            {t('session.playing')}
           </span>
         )}
       </div>
 
       {/* Options Grid */}
       <div className="p-6 md:p-8 pt-0">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {exercise.options_json.map((option: ExerciseOption, idx: number) => {
             const isSelected = selectedOptionId === option.id;
             const isCorrectOption = option.id === exercise.correct_answer;
+
+            // Option translation for English or Russian learners
+            const optionTranslation =
+              language === 'ru'
+                ? option.text_ru
+                : language === 'en'
+                ? option.text_en
+                : '';
 
             let cardStyles = 'border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/30 text-slate-800';
 
@@ -228,7 +249,7 @@ export const InteractiveAudioExercisePlayer: React.FC<InteractiveAudioExercisePl
                 type="button"
                 onClick={() => handleSelectOption(option)}
                 disabled={status !== 'unanswered'}
-                className={`relative group p-5 md:p-6 rounded-2xl border-2 transition-all duration-200 flex flex-col items-center justify-center text-center cursor-pointer select-none ${cardStyles}`}
+                className={`relative group p-5 rounded-2xl border-2 transition-all duration-200 flex flex-col items-center justify-center text-center cursor-pointer select-none ${cardStyles}`}
               >
                 {/* Keyboard badge */}
                 <span className="absolute top-3 left-3 w-5 h-5 rounded-md bg-slate-100 text-slate-500 text-xs font-mono font-semibold flex items-center justify-center border border-slate-200">
@@ -238,7 +259,7 @@ export const InteractiveAudioExercisePlayer: React.FC<InteractiveAudioExercisePl
                 {/* Arabic Script */}
                 <span
                   dir="rtl"
-                  className="text-4xl md:text-5xl font-arabic text-slate-900 mb-2 py-2 leading-relaxed"
+                  className="text-2xl sm:text-3xl font-arabic text-slate-900 mb-1 py-1 leading-relaxed"
                 >
                   {option.text}
                 </span>
@@ -247,6 +268,13 @@ export const InteractiveAudioExercisePlayer: React.FC<InteractiveAudioExercisePl
                 {option.transliteration && (
                   <span className="text-xs font-medium tracking-wide text-slate-500 group-hover:text-emerald-700 transition-colors">
                     {option.transliteration}
+                  </span>
+                )}
+
+                {/* Meaning / Translation in active language */}
+                {optionTranslation && (
+                  <span className="text-[11px] text-emerald-700 font-medium mt-1 bg-emerald-50 px-2 py-0.5 rounded-full">
+                    {optionTranslation}
                   </span>
                 )}
               </button>
@@ -272,9 +300,9 @@ export const InteractiveAudioExercisePlayer: React.FC<InteractiveAudioExercisePl
               <div className="flex items-start gap-3">
                 <CheckCircle2 className="w-8 h-8 text-emerald-600 shrink-0 mt-0.5" />
                 <div>
-                  <h4 className="font-bold text-emerald-900 text-base">Mumtaz! Excellent! (ممتاز 🎉)</h4>
+                  <h4 className="font-bold text-emerald-900 text-base">{t('session.correct_title')}</h4>
                   <p className="text-xs md:text-sm text-emerald-800 mt-0.5">
-                    {exercise.explanation || 'أحسنت! إجابة صحيحة ومطابقة للصوت بدقة.'}
+                    {localizedExplanation || 'أحسنت! إجابة صحيحة ومطابقة للصوت بدقة.'}
                   </p>
                 </div>
               </div>
@@ -284,9 +312,9 @@ export const InteractiveAudioExercisePlayer: React.FC<InteractiveAudioExercisePl
               <div className="flex items-start gap-3">
                 <XCircle className="w-8 h-8 text-rose-600 shrink-0 mt-0.5" />
                 <div>
-                  <h4 className="font-bold text-rose-900 text-base">Not quite right (حاول مرة أخرى ⚠️)</h4>
+                  <h4 className="font-bold text-rose-900 text-base">{t('session.incorrect_title')}</h4>
                   <p className="text-xs md:text-sm text-rose-800 mt-0.5">
-                    {exercise.explanation || 'استمع جيداً لمخرج الحرف وعدد النقاط وموضعها.'}
+                    {localizedExplanation || 'استمع جيداً لمخرج الصوت واختر الإجابة الصحيحة.'}
                   </p>
                 </div>
               </div>
@@ -294,7 +322,7 @@ export const InteractiveAudioExercisePlayer: React.FC<InteractiveAudioExercisePl
 
             {status === 'unanswered' && (
               <p className="text-xs text-slate-500 italic hidden md:block">
-                اختر الحرف المطابق للصوت ثم اضغط <kbd className="px-1.5 py-0.5 bg-slate-200 rounded text-[11px] font-mono">Enter</kbd>
+                {t('session.play_audio')}
               </p>
             )}
           </div>
@@ -306,25 +334,25 @@ export const InteractiveAudioExercisePlayer: React.FC<InteractiveAudioExercisePl
                 type="button"
                 onClick={handleCheckAnswer}
                 disabled={!selectedOptionId}
-                className={`w-full md:w-44 py-3 px-6 rounded-xl font-bold text-sm tracking-wide shadow-md transition-all ${
+                className={`w-full md:w-44 py-3 px-6 rounded-xl font-bold text-sm tracking-wide shadow-xs transition-all ${
                   selectedOptionId
                     ? 'bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer hover:shadow-emerald-200'
                     : 'bg-slate-200 text-slate-400 cursor-not-allowed'
                 }`}
               >
-                تحقق من الإجابة
+                {t('session.check_answer')}
               </button>
             ) : (
               <button
                 type="button"
                 onClick={onNext}
-                className={`w-full md:w-44 py-3 px-6 rounded-xl font-bold text-sm tracking-wide text-white shadow-md flex items-center justify-center gap-2 cursor-pointer transition-all ${
+                className={`w-full md:w-44 py-3 px-6 rounded-xl font-bold text-sm tracking-wide text-white shadow-xs flex items-center justify-center gap-2 cursor-pointer transition-all ${
                   status === 'correct'
                     ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200'
                     : 'bg-rose-600 hover:bg-rose-700 shadow-rose-200'
                 }`}
               >
-                <span>التالي (Next)</span>
+                <span>{t('session.next')}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             )}
