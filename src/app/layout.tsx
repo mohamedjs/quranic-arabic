@@ -4,8 +4,8 @@ import { LanguageProvider } from '@/lib/i18n/LanguageContext';
 import { AppShell } from '@/components/layout/AppShell';
 
 export const metadata: Metadata = {
-  title: 'بيان | منصة تعليم اللغة العربية والقرآن للمبتدئين | Bayan Arabic',
-  description: 'منصة تفاعلية متعددة اللغات لتعليم اللغة العربية الفصحى والقرآنية لغير الناطقين بها من الصفر حتى الإتقان (العربية - English - Русский).',
+  title: 'التحفة الأزهرية | منصة تعليم اللغة العربية للناطقين بغيرها | Al-Tuhfa Al-Azhariyya',
+  description: 'المنهج الأزهري المعتمد لتعليم اللغة العربية لغير الناطقين بها من الصفر حتى الإتقان (العربية - English - Русский) — متاح مجاناً 100% للجميع.',
 };
 
 export default function RootLayout({

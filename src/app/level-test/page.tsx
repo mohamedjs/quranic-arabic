@@ -202,7 +202,7 @@ export default function LevelTestPage() {
     <div className="max-w-3xl mx-auto px-4 py-12" dir={dir}>
       <div className="text-center mb-8">
         <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full">
-          Madinah Arabic • Level Assessment
+          {t('brand.name')} • {t('level_test.title')}
         </span>
         <h1 className="text-3xl font-extrabold text-slate-900 font-arabic mt-2">
           {t('level_test.title')}

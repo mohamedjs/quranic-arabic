@@ -110,7 +110,7 @@ export const InteractiveAlphabetChart: React.FC = () => {
         <div>
           <span className="text-xs font-bold uppercase tracking-wider text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full inline-flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Madinah Arabic • Reading Tool</span>
+            <span>{t('brand.name')} • {t('home.alphabet_title')}</span>
           </span>
           <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 font-arabic mt-2">
             {t('home.alphabet_title')}
