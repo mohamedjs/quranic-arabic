@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase/client';
 import { Level, Unit, Lesson } from '@/types/database.types';
-import { CheckCircle, Lock, Play, Sparkles, Gift, ArrowLeft, ArrowRight } from 'lucide-react';
+import { CheckCircle, Play, Sparkles, Gift, ArrowLeft, ArrowRight, Layers, BookOpen } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 export default function LearnPage() {
@@ -57,8 +57,8 @@ export default function LearnPage() {
           <p className="text-sm font-arabic">{t('learn.loading')}</p>
         </div>
       ) : (
-        <div className="space-y-12">
-          {levels.map((level) => {
+        <div className="space-y-10">
+          {levels.map((level, lvlIdx) => {
             const levelUnits = units.filter((u) => u.level_id === level.id);
             const levelTitle = getLocalized(level, 'title');
             const levelDesc = getLocalized(level, 'description');
@@ -66,40 +66,29 @@ export default function LearnPage() {
             return (
               <div
                 key={level.id}
-                className={`rounded-3xl p-6 sm:p-8 border shadow-xs ${
-                  level.is_free ? 'bg-white border-emerald-200 ring-2 ring-emerald-500/20' : 'bg-white border-slate-200'
-                }`}
+                className="rounded-3xl p-6 sm:p-8 border shadow-xs bg-white border-emerald-200 ring-2 ring-emerald-500/10"
               >
                 {/* Level Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-5 mb-6 gap-3">
                   <div>
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-md font-mono">
-                        {level.slug}
+                        Stage {lvlIdx + 1}
                       </span>
-                      {level.is_free && (
-                        <span className="text-xs font-bold text-amber-800 bg-amber-100 px-2.5 py-0.5 rounded-md flex items-center gap-1">
-                          <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-                          <span>{t('learn.free_badge')}</span>
-                        </span>
-                      )}
+                      <span className="text-xs font-bold text-amber-800 bg-amber-100 px-2.5 py-0.5 rounded-md flex items-center gap-1">
+                        <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                        <span>{t('learn.free_badge')}</span>
+                      </span>
                     </div>
                     <h2 className="text-2xl font-bold text-slate-900 font-arabic">{levelTitle}</h2>
                     <p className="text-sm text-slate-500 mt-1">{levelDesc}</p>
                   </div>
 
                   <div>
-                    {level.is_free ? (
-                      <span className="px-4 py-1.5 rounded-full bg-emerald-600 text-white text-xs font-bold shadow-xs flex items-center gap-1.5">
-                        <CheckCircle className="w-3.5 h-3.5" />
-                        <span>{t('learn.free_status')}</span>
-                      </span>
-                    ) : (
-                      <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 text-xs font-bold">
-                        <Lock className="w-3.5 h-3.5 text-slate-500" />
-                        <span>{t('learn.pro_status')}</span>
-                      </span>
-                    )}
+                    <span className="px-4 py-1.5 rounded-full bg-emerald-600 text-white text-xs font-bold shadow-xs flex items-center gap-1.5">
+                      <CheckCircle className="w-3.5 h-3.5" />
+                      <span>{t('learn.free_status')}</span>
+                    </span>
                   </div>
                 </div>
 
@@ -114,11 +103,9 @@ export default function LearnPage() {
                       <div key={unit.id} className="p-5 sm:p-6 rounded-2xl bg-slate-50 border border-slate-200/80">
                         <div className="flex items-center justify-between mb-2">
                           <h3 className="font-bold text-slate-900 text-base sm:text-lg font-arabic">{unitTitle}</h3>
-                          {level.is_free && (
-                            <span className="text-[11px] font-bold text-emerald-700 bg-emerald-100/70 px-2.5 py-0.5 rounded-full">
-                              {t('learn.trial_label')}
-                            </span>
-                          )}
+                          <span className="text-[11px] font-bold text-emerald-700 bg-emerald-100/80 px-2.5 py-0.5 rounded-full">
+                            {t('learn.trial_label')}
+                          </span>
                         </div>
                         <p className="text-xs text-slate-500 mb-5 leading-relaxed">{unitDesc}</p>
 

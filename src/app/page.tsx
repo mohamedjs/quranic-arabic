@@ -10,25 +10,25 @@ import {
   ArrowLeft,
   ArrowRight,
   BookOpen,
-  Users,
-  Video,
+  Layers,
   CheckCircle2,
   Award,
   Star,
   Gift,
   Volume2,
-  ShieldCheck
+  Flame,
+  Check
 } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 
-const BAYNA_YADAYK_SAMPLE_EXERCISES: Exercise[] = [
+const SAMPLE_EXERCISES: Exercise[] = [
   {
-    id: 'by-ex-1',
+    id: 'sm-ex-1',
     lesson_id: 'l-1',
-    question_text: 'استمع إلى الحوار الأول من كتاب (العربية بين يديك): ما هو الرد النموذجي على التحية؟',
-    question_ar: 'استمع إلى الحوار الأول من كتاب (العربية بين يديك): ما هو الرد النموذجي على التحية؟',
-    question_en: 'Listen to Dialogue 1 from Bayna Yadayk: What is the correct response to the greeting?',
-    question_ru: 'Послушайте диалог 1 из книги «Байна Ядайк»: Каков правильный ответ на приветствие?',
+    question_text: 'استمع إلى الحوار الأول: ما هو الرد النموذجي على إلقاء السلام؟',
+    question_ar: 'استمع إلى الحوار الأول: ما هو الرد النموذجي على إلقاء السلام؟',
+    question_en: 'Listen to Dialogue 1: What is the correct response to the Islamic greeting?',
+    question_ru: 'Послушайте диалог 1: Каков правильный ответ на приветствие?',
     arabic_text: 'وَعَلَيْكُمُ السَّلامُ',
     transliteration: 'Wa alaykumus-salam',
     translation: 'And upon you be peace',
@@ -43,17 +43,17 @@ const BAYNA_YADAYK_SAMPLE_EXERCISES: Exercise[] = [
       { id: 'opt4', text: 'صَبَاحَ الْخَيْرِ', transliteration: 'Sabah al-khayr', text_en: 'Good morning', text_ru: 'Доброе утро' },
     ],
     correct_answer: 'opt1',
-    explanation: 'الرد الإسلامي والأدبي المعتمد في الحوار الأول من سلسلة العربية بين يديك: وعليكم السلام ورحمة الله وبركاته.',
-    explanation_ar: 'الرد الإسلامي والأدبي المعتمد في الحوار الأول من سلسلة العربية بين يديك: وعليكم السلام ورحمة الله وبركاته.',
-    explanation_en: 'The standard response in Dialogue 1 of Al-Arabiyyah Bayna Yadayk: Wa alaykumus-salam.',
-    explanation_ru: 'Канонический ответ в 1-м диалоге курса «Байна Ядайк»: Ва алейкумус-салям.',
+    explanation: 'الرد المعتمد في الحوار الأول: وعليكم السلام ورحمة الله وبركاته.',
+    explanation_ar: 'الرد المعتمد في الحوار الأول: وعليكم السلام ورحمة الله وبركاته.',
+    explanation_en: 'The standard response in Dialogue 1: Wa alaykumus-salam.',
+    explanation_ru: 'Канонический ответ: Ва алейкумус-салям.',
     order_index: 1,
   },
   {
-    id: 'by-ex-2',
+    id: 'sm-ex-2',
     lesson_id: 'l-1',
-    question_text: 'استمع للسؤال: (كَيْفَ حَالُكَ؟) - اختر الرد الصحيح كما ورد في كتاب العربية بين يديك:',
-    question_ar: 'استمع للسؤال: (كَيْفَ حَالُكَ؟) - اختر الرد الصحيح كما ورد في كتاب العربية بين يديك:',
+    question_text: 'استمع للسؤال: (كَيْفَ حَالُكَ؟) - اختر الرد الصحيح:',
+    question_ar: 'استمع للسؤال: (كَيْفَ حَالُكَ؟) - اختر الرد الصحيح:',
     question_en: 'Listen to the question: (How are you?) - Choose the matching response:',
     question_ru: 'Послушайте вопрос: (Как твои дела?) - Выберите правильный ответ:',
     arabic_text: 'بِخَيْرٍ وَالْحَمْدُ لِلَّهِ',
@@ -70,10 +70,10 @@ const BAYNA_YADAYK_SAMPLE_EXERCISES: Exercise[] = [
       { id: 'opt4', text: 'هُوَ مُدَرِّسٌ', transliteration: 'Huwa mudarris', text_en: 'He is a teacher', text_ru: 'Он учитель' },
     ],
     correct_answer: 'opt2',
-    explanation: 'حوار خالد وخليل (العربية بين يديك): كيف حالك؟ - بخير والحمد لله.',
-    explanation_ar: 'حوار خالد وخليل (العربية بين يديك): كيف حالك؟ - بخير والحمد لله.',
-    explanation_en: 'Dialogue between Khalid and Khalil: How are you? - Fine, praise be to Allah.',
-    explanation_ru: 'Диалог Халида и Халиля: Как дела? - Хорошо, хвала Аллаху.',
+    explanation: 'الجواب الصحيح على (كيف حالك؟): بخير والحمد لله.',
+    explanation_ar: 'الجواب الصحيح على (كيف حالك؟): بخير والحمد لله.',
+    explanation_en: 'The standard response is: Fine, praise be to Allah.',
+    explanation_ru: 'Канонический ответ: Бихайрин вальхамдулиллях.',
     order_index: 2,
   },
 ];
@@ -82,17 +82,17 @@ const REVIEWS = [
   {
     name: 'Annabelle Drummond',
     country: 'United Kingdom 🇬🇧',
-    text: 'This is an excellent online Arabic teaching programme. I have found it most beneficial with both Tajweed and Arabic language lessons. Booking is seamless and teachers are exceptional.',
+    text: 'This is an excellent online Arabic self-study programme. The structured 4-stage progression makes reading, pronunciation, and vocabulary so intuitive and enjoyable without any paywalls.',
   },
   {
     name: 'Umm Omar',
     country: 'United States 🇺🇸',
-    text: 'Madinah Arabic excels in teaching quality. My 5-year-old son has memorized 9 Surahs of Juz Amma with weekly classes and understands their meanings in simple English.',
+    text: 'Finally a sound Arabic curriculum that takes you from the alphabet to Quranic verses step by step. My children love the interactive alphabet sound chart and daily exercise streaks.',
   },
   {
     name: 'Zeyneb Temnenko',
     country: 'Kazakhstan / CIS 🇰🇿',
-    text: 'После занятий с преподавателем я почувствовала огромный прогресс. Мой учитель — настоящий профессионал, я начала читать и понимать арабские тексты и грамматику.',
+    text: 'Очень понятная и логичная 4-этапная система! Начиная с букв и правильного махраджа, я перешла к диалогам и теперь понимаю короткие суры Корана. Огромное спасибо за бесплатный доступ!',
   },
 ];
 
@@ -100,11 +100,11 @@ export default function HomePage() {
   const { t, dir } = useLanguage();
   const [currentIdx, setCurrentIdx] = useState(0);
 
-  const currentExercise = BAYNA_YADAYK_SAMPLE_EXERCISES[currentIdx];
+  const currentExercise = SAMPLE_EXERCISES[currentIdx];
   const isRtl = dir === 'rtl';
 
   const handleNext = () => {
-    setCurrentIdx((prev) => (prev + 1) % BAYNA_YADAYK_SAMPLE_EXERCISES.length);
+    setCurrentIdx((prev) => (prev + 1) % SAMPLE_EXERCISES.length);
   };
 
   return (
@@ -113,7 +113,7 @@ export default function HomePage() {
       <div className="w-full bg-gradient-to-r from-emerald-700 via-emerald-600 to-teal-700 text-white py-2.5 px-4 text-center text-xs sm:text-sm font-bold shadow-xs flex items-center justify-center gap-2">
         <Gift className="w-4 h-4 text-amber-300 animate-bounce" />
         <span>{t('banner.free_trial')}</span>
-        <Link href="/one-to-one" className="underline hover:text-amber-200 transition-colors mx-2">
+        <Link href="/learn" className="underline hover:text-amber-200 transition-colors mx-2">
           {t('banner.start_now')}
         </Link>
       </div>
@@ -126,10 +126,7 @@ export default function HomePage() {
         </div>
 
         <h1 className="text-4xl sm:text-6xl font-black text-slate-900 tracking-tight max-w-4xl mx-auto leading-tight font-arabic">
-          {t('home.hero_title')}{' '}
-          <span className="text-emerald-600 block sm:inline">
-            (Madinah Arabic)
-          </span>
+          {t('home.hero_title')}
         </h1>
 
         <p className="mt-5 text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
@@ -139,134 +136,136 @@ export default function HomePage() {
         {/* Dual Primary CTAs */}
         <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
           <Link
-            href="/one-to-one"
+            href="/learn"
             className="px-8 py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm sm:text-base shadow-xl shadow-emerald-200 hover:shadow-2xl transition-all flex items-center gap-2.5 cursor-pointer"
           >
-            <Video className="w-5 h-5" />
-            <span>{t('home.cta_trial')}</span>
+            <BookOpen className="w-5 h-5" />
+            <span>{t('home.cta_curriculum')}</span>
             {isRtl ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
           </Link>
 
           <Link
-            href="/learn"
+            href="/level-test"
             className="px-7 py-4 rounded-2xl bg-white hover:bg-slate-50 text-slate-800 border-2 border-slate-200 font-bold text-sm sm:text-base shadow-sm transition-all flex items-center gap-2 cursor-pointer"
           >
-            <BookOpen className="w-5 h-5 text-emerald-600" />
-            <span>{t('home.cta_self_study')}</span>
+            <Award className="w-5 h-5 text-amber-500" />
+            <span>{t('home.cta_level_test')}</span>
           </Link>
         </div>
       </section>
 
-      {/* Two Main Learning Options Grid */}
+      {/* 4 Progressive Stages Cards */}
       <section className="w-full max-w-6xl mx-auto px-4 sm:px-6 pb-16">
-        <div className="text-center max-w-2xl mx-auto mb-10">
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 font-arabic">
-            {t('home.paths_title')}
+        <div className="text-center max-w-2xl mx-auto mb-12">
+          <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-100 px-3.5 py-1 rounded-full">
+            المنهج المتدرج • 4 مراحل علمية
+          </span>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 font-arabic mt-3">
+            {t('home.stages_title')}
           </h2>
+          <p className="text-xs sm:text-sm text-slate-500 mt-2">
+            {t('home.stages_subtitle')}
+          </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 items-stretch">
-          {/* Path 1: Free Online Content */}
-          <div className="p-8 rounded-3xl bg-white border-2 border-slate-200/80 shadow-xs hover:border-emerald-400 transition-all flex flex-col justify-between">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {/* Stage 1 */}
+          <div className="p-6 rounded-3xl bg-white border-2 border-emerald-100 shadow-xs hover:border-emerald-500 hover:shadow-md transition-all flex flex-col justify-between group">
             <div>
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                  <BookOpen className="w-6 h-6" />
-                </div>
-                <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">
-                  100% Free
-                </span>
+              <div className="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-700 font-black flex items-center justify-center text-sm mb-4">
+                01
               </div>
-
-              <h3 className="text-2xl font-bold text-slate-900 font-arabic">
-                {t('home.path_free_title')}
+              <span className="text-[11px] font-bold text-emerald-600 uppercase tracking-wider block mb-1">
+                Pre-A1 • التأسيس
+              </span>
+              <h3 className="font-bold text-base text-slate-900 font-arabic mb-2">
+                {t('home.stage1_title')}
               </h3>
-              <p className="text-xs text-emerald-700 font-bold uppercase tracking-wider mt-1">
-                {t('home.path_free_subtitle')}
+              <p className="text-xs text-slate-500 leading-relaxed mb-4">
+                {t('home.stage1_desc')}
               </p>
-              <p className="text-sm text-slate-600 mt-3 mb-6 leading-relaxed">
-                {t('home.path_free_desc')}
-              </p>
-
-              <ul className="space-y-3 text-xs sm:text-sm text-slate-700 mb-8">
-                <li className="flex items-center gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>{t('home.path_free_f1')}</span>
-                </li>
-                <li className="flex items-center gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>{t('home.path_free_f2')}</span>
-                </li>
-                <li className="flex items-center gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>{t('home.path_free_f3')}</span>
-                </li>
-                <li className="flex items-center gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>{t('home.path_free_f4')}</span>
-                </li>
-              </ul>
             </div>
-
             <Link
               href="/learn"
-              className="w-full py-4 rounded-xl border-2 border-emerald-600 text-emerald-700 hover:bg-emerald-50 font-bold text-sm text-center transition-colors block"
+              className="text-xs font-bold text-emerald-700 group-hover:underline flex items-center gap-1 mt-2"
             >
-              {t('home.path_free_btn')}
+              <span>دخول المرحلة</span>
+              {isRtl ? '←' : '→'}
             </Link>
           </div>
 
-          {/* Path 2: One-to-One Lessons */}
-          <div className="p-8 rounded-3xl bg-slate-900 text-white shadow-xl border-2 border-emerald-500 relative flex flex-col justify-between">
-            <div className="absolute -top-3.5 right-8 px-3 py-1 rounded-full bg-emerald-500 text-white text-xs font-bold uppercase tracking-wider shadow-md">
-              Most Popular
-            </div>
-
+          {/* Stage 2 */}
+          <div className="p-6 rounded-3xl bg-white border-2 border-emerald-100 shadow-xs hover:border-emerald-500 hover:shadow-md transition-all flex flex-col justify-between group">
             <div>
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-800 text-emerald-300 flex items-center justify-center">
-                  <Users className="w-6 h-6" />
-                </div>
-                <span className="px-3 py-1 rounded-full bg-emerald-950 text-emerald-400 text-xs font-bold border border-emerald-800">
-                  Certified Tutors
-                </span>
+              <div className="w-10 h-10 rounded-2xl bg-teal-100 text-teal-700 font-black flex items-center justify-center text-sm mb-4">
+                02
               </div>
-
-              <h3 className="text-2xl font-bold text-white font-arabic">
-                {t('home.path_1to1_title')}
+              <span className="text-[11px] font-bold text-teal-600 uppercase tracking-wider block mb-1">
+                A1 • المحادثة
+              </span>
+              <h3 className="font-bold text-base text-slate-900 font-arabic mb-2">
+                {t('home.stage2_title')}
               </h3>
-              <p className="text-xs text-emerald-400 font-bold uppercase tracking-wider mt-1">
-                {t('home.path_1to1_subtitle')}
+              <p className="text-xs text-slate-500 leading-relaxed mb-4">
+                {t('home.stage2_desc')}
               </p>
-              <p className="text-sm text-slate-300 mt-3 mb-6 leading-relaxed">
-                {t('home.path_1to1_desc')}
-              </p>
-
-              <ul className="space-y-3 text-xs sm:text-sm text-slate-200 mb-8">
-                <li className="flex items-center gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <span>{t('home.path_1to1_f1')}</span>
-                </li>
-                <li className="flex items-center gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <span>{t('home.path_1to1_f2')}</span>
-                </li>
-                <li className="flex items-center gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <span>{t('home.path_1to1_f3')}</span>
-                </li>
-                <li className="flex items-center gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <span>{t('home.path_1to1_f4')}</span>
-                </li>
-              </ul>
             </div>
-
             <Link
-              href="/one-to-one"
-              className="w-full py-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm text-center shadow-lg transition-colors block"
+              href="/learn"
+              className="text-xs font-bold text-teal-700 group-hover:underline flex items-center gap-1 mt-2"
             >
-              {t('home.path_1to1_btn')}
+              <span>دخول المرحلة</span>
+              {isRtl ? '←' : '→'}
+            </Link>
+          </div>
+
+          {/* Stage 3 */}
+          <div className="p-6 rounded-3xl bg-white border-2 border-emerald-100 shadow-xs hover:border-emerald-500 hover:shadow-md transition-all flex flex-col justify-between group">
+            <div>
+              <div className="w-10 h-10 rounded-2xl bg-blue-100 text-blue-700 font-black flex items-center justify-center text-sm mb-4">
+                03
+              </div>
+              <span className="text-[11px] font-bold text-blue-600 uppercase tracking-wider block mb-1">
+                A2 • القواعد
+              </span>
+              <h3 className="font-bold text-base text-slate-900 font-arabic mb-2">
+                {t('home.stage3_title')}
+              </h3>
+              <p className="text-xs text-slate-500 leading-relaxed mb-4">
+                {t('home.stage3_desc')}
+              </p>
+            </div>
+            <Link
+              href="/learn"
+              className="text-xs font-bold text-blue-700 group-hover:underline flex items-center gap-1 mt-2"
+            >
+              <span>دخول المرحلة</span>
+              {isRtl ? '←' : '→'}
+            </Link>
+          </div>
+
+          {/* Stage 4 */}
+          <div className="p-6 rounded-3xl bg-gradient-to-b from-slate-900 to-slate-950 text-white shadow-md border-2 border-amber-500/40 hover:border-amber-400 transition-all flex flex-col justify-between group">
+            <div>
+              <div className="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-400 font-black flex items-center justify-center text-sm mb-4 border border-amber-400/30">
+                04
+              </div>
+              <span className="text-[11px] font-bold text-amber-300 uppercase tracking-wider block mb-1">
+                B1 • لغة القرآن
+              </span>
+              <h3 className="font-bold text-base text-white font-arabic mb-2">
+                {t('home.stage4_title')}
+              </h3>
+              <p className="text-xs text-slate-300 leading-relaxed mb-4">
+                {t('home.stage4_desc')}
+              </p>
+            </div>
+            <Link
+              href="/learn"
+              className="text-xs font-bold text-amber-300 group-hover:underline flex items-center gap-1 mt-2"
+            >
+              <span>دخول المرحلة</span>
+              {isRtl ? '←' : '→'}
             </Link>
           </div>
         </div>
@@ -290,7 +289,7 @@ export default function HomePage() {
               </span>
             </div>
             <h3 className="text-2xl font-bold font-arabic">
-              اختبار تحديد المستوى السريع (Level Placement Test)
+              اختبار تحديد المستوى الذكي (Placement Test)
             </h3>
             <p className="text-xs sm:text-sm text-slate-300 mt-2 leading-relaxed">
               {t('home.level_test_banner_desc')}
@@ -320,7 +319,7 @@ export default function HomePage() {
               </h3>
             </div>
             <div className="text-xs text-slate-500 font-medium bg-slate-100 px-3 py-1 rounded-full">
-              {currentIdx + 1} / {BAYNA_YADAYK_SAMPLE_EXERCISES.length}
+              {currentIdx + 1} / {SAMPLE_EXERCISES.length}
             </div>
           </div>
 
@@ -337,7 +336,7 @@ export default function HomePage() {
       <section className="w-full max-w-6xl mx-auto px-4 sm:px-6 py-16">
         <div className="text-center max-w-2xl mx-auto mb-12">
           <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full">
-            قصص وتجارب حقيقية
+            تجارب الطلاب حول العالم
           </span>
           <h2 className="text-3xl font-bold text-slate-900 mt-3 font-arabic">
             {t('home.testimonials_title')}

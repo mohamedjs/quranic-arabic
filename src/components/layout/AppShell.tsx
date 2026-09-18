@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { LanguageSelector } from '@/components/ui/LanguageSelector';
-import { BookOpen, Users, Award, LayoutDashboard, Sparkles, CheckCircle2 } from 'lucide-react';
+import { BookOpen, Layers, Award, LayoutDashboard, Gift, Sparkles } from 'lucide-react';
 
 export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { t, dir } = useLanguage();
@@ -39,16 +39,16 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
               </Link>
               <Link
                 href="/learn"
-                className="px-3 py-1.5 rounded-lg hover:text-emerald-700 hover:bg-emerald-50 transition-colors"
-              >
-                {t('nav.free_content')}
-              </Link>
-              <Link
-                href="/one-to-one"
                 className="px-3 py-1.5 rounded-lg text-emerald-800 bg-emerald-50 hover:bg-emerald-100 transition-colors flex items-center gap-1"
               >
-                <Users className="w-3.5 h-3.5 text-emerald-600" />
-                <span>{t('nav.one_to_one')}</span>
+                <Layers className="w-3.5 h-3.5 text-emerald-600" />
+                <span>{t('nav.curriculum')}</span>
+              </Link>
+              <Link
+                href="/#alphabet"
+                className="px-3 py-1.5 rounded-lg hover:text-emerald-700 hover:bg-emerald-50 transition-colors"
+              >
+                {t('nav.reading')}
               </Link>
               <Link
                 href="/level-test"
@@ -59,7 +59,7 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
               </Link>
               <Link
                 href="/pricing"
-                className="px-3 py-1.5 rounded-lg hover:text-emerald-700 hover:bg-emerald-50 transition-colors"
+                className="px-3 py-1.5 rounded-lg text-emerald-700 hover:bg-emerald-50 transition-colors font-extrabold"
               >
                 {t('nav.pricing')}
               </Link>
@@ -93,30 +93,31 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
               {t('brand.name')} • {t('brand.en_name')}
             </span>
             <p className="text-slate-400 text-[11px] leading-relaxed">
-              المنصة العالمية الأولى المتخصصة في تعليم اللغة العربية لغير الناطقين بها وتدريس القرآن الكريم والتجويد أونلاين.
+              منصة تعليمية عالمية مفتوحة مجاناً 100% بدون أي رسوم، متخصصة في تدريس العربية والقرآن الكريم عبر 4 مراحل علمية متدرجة.
             </p>
           </div>
 
           <div>
-            <span className="font-bold text-slate-900 text-xs block mb-3">الدورات والمحتوى</span>
+            <span className="font-bold text-slate-900 text-xs block mb-3">المراحل التعليمية</span>
+            <ul className="space-y-2 text-slate-500">
+              <li><Link href="/learn" className="hover:text-emerald-600">المرحلة 1: التأسيس والأصوات</Link></li>
+              <li><Link href="/learn" className="hover:text-emerald-600">المرحلة 2: المحادثة والتواصل</Link></li>
+              <li><Link href="/learn" className="hover:text-emerald-600">المرحلة 3: القواعد وبناء الجمل</Link></li>
+              <li><Link href="/learn" className="hover:text-emerald-600">المرحلة 4: لغة القرآن والتجويد</Link></li>
+            </ul>
+          </div>
+
+          <div>
+            <span className="font-bold text-slate-900 text-xs block mb-3">الأدوات التفاعلية</span>
             <ul className="space-y-2 text-slate-500">
               <li><Link href="/#alphabet" className="hover:text-emerald-600">لوحة الحروف الأبجدية</Link></li>
-              <li><Link href="/learn" className="hover:text-emerald-600">منهج العربية بين يديك</Link></li>
               <li><Link href="/level-test" className="hover:text-emerald-600">اختبار تحديد المستوى</Link></li>
+              <li><Link href="/pricing" className="hover:text-emerald-600">المبادرة المجانية 100%</Link></li>
             </ul>
           </div>
 
           <div>
-            <span className="font-bold text-slate-900 text-xs block mb-3">الدروس الخصوصية</span>
-            <ul className="space-y-2 text-slate-500">
-              <li><Link href="/one-to-one" className="hover:text-emerald-600">دروس فردية 1:1</Link></li>
-              <li><Link href="/one-to-one" className="hover:text-emerald-600">معلمو القرآن والتجويد</Link></li>
-              <li><Link href="/pricing" className="hover:text-emerald-600">خطط الأسعار والحزم</Link></li>
-            </ul>
-          </div>
-
-          <div>
-            <span className="font-bold text-slate-900 text-xs block mb-3">الدعم والمشرف</span>
+            <span className="font-bold text-slate-900 text-xs block mb-3">لوحة الإدارة</span>
             <ul className="space-y-2 text-slate-500">
               <li><Link href="/admin" className="hover:text-emerald-600">لوحة تحكم المشرف</Link></li>
               <li><Link href="/admin/login" className="hover:text-emerald-600">تسجيل الدخول</Link></li>
