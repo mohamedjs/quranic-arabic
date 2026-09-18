@@ -4,112 +4,141 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { InteractiveAudioExercisePlayer } from '@/components/audio/InteractiveAudioExercisePlayer';
 import { Exercise } from '@/types/database.types';
-import { Sparkles, CheckCircle, ArrowRight, LayoutDashboard, Volume2, BookOpen } from 'lucide-react';
+import { Sparkles, CheckCircle, ArrowLeft, LayoutDashboard, Volume2, BookOpen, Gift, Star, ShieldCheck } from 'lucide-react';
 
-const SAMPLE_EXERCISES: Exercise[] = [
+const BAYNA_YADAYK_SAMPLE_EXERCISES: Exercise[] = [
   {
-    id: 'ex-1',
+    id: 'by-ex-1',
     lesson_id: 'l-1',
-    question_text: 'استمع جيداً للصوت واضغط على الحرف المطابق له (Listen & Identify):',
-    arabic_text: 'ب',
-    transliteration: 'Baa',
-    translation: 'Letter Baa',
+    question_text: 'استمع إلى الحوار الأول من كتاب (العربية بين يديك): ما هو الرد النموذجي على التحية؟',
+    arabic_text: 'وَعَلَيْكُمُ السَّلامُ',
+    transliteration: 'Wa alaykumus-salam',
+    translation: 'And upon you be peace',
     question_type: 'audio_mcq',
-    audio_url: '/audio/letters/baa.mp3',
+    audio_url: '/audio/bayna-yadayk/salam_intro.mp3',
     options_json: [
-      { id: 'opt1', text: 'ب', transliteration: 'Baa (نقطة واحدة بالأسفل)' },
-      { id: 'opt2', text: 'ت', transliteration: 'Taa (نقطتان بالأعلى)' },
-      { id: 'opt3', text: 'ث', transliteration: 'Thaa (ثلاث نقاط بالأعلى)' },
-      { id: 'opt4', text: 'ن', transliteration: 'Noon (نقطة داخل الصحن)' },
+      { id: 'opt1', text: 'وَعَلَيْكُمُ السَّلامُ', transliteration: 'Wa alaykumus-salam (وعليكم السلام)' },
+      { id: 'opt2', text: 'أَهْلاً وَسَهْلاً', transliteration: 'Ahlan wa sahlan (أهلاً وسهلاً)' },
+      { id: 'opt3', text: 'مَعَ السَّلامَةِ', transliteration: 'Ma as-salamah (مع السلامة)' },
+      { id: 'opt4', text: 'صَبَاحَ الْخَيْرِ', transliteration: 'Sabah al-khayr (صباح الخير)' },
     ],
     correct_answer: 'opt1',
-    explanation: 'حرف الباء (ب) يتميز بوجود نقطة واحدة أسفل الصحن الأفقي.',
+    explanation: 'الرد الإسلامي والأدبي المعتمد في الحوار الأول من سلسلة العربية بين يديك: وعليكم السلام ورحمة الله وبركاته.',
     order_index: 1,
   },
   {
-    id: 'ex-2',
+    id: 'by-ex-2',
     lesson_id: 'l-1',
-    question_text: 'استمع لحرف الثاء اللثوي (طرف اللسان مع أطراف الثنايا العليا):',
-    arabic_text: 'ث',
-    transliteration: 'Thaa',
-    translation: 'Letter Thaa',
+    question_text: 'استمع للسؤال: (كَيْفَ حَالُكَ؟) - اختر الرد الصحيح كما ورد في كتاب العربية بين يديك:',
+    arabic_text: 'بِخَيْرٍ وَالْحَمْدُ لِلَّهِ',
+    transliteration: 'Bikhayrin walhamdulillah',
+    translation: 'Fine, and praise be to Allah',
     question_type: 'audio_mcq',
-    audio_url: '/audio/letters/thaa.mp3',
+    audio_url: '/audio/bayna-yadayk/kayfa_haluk.mp3',
     options_json: [
-      { id: 'opt1', text: 'ت', transliteration: 'Taa' },
-      { id: 'opt2', text: 'ث', transliteration: 'Thaa' },
-      { id: 'opt3', text: 'ب', transliteration: 'Baa' },
-      { id: 'opt4', text: 'س', transliteration: 'Seen' },
+      { id: 'opt1', text: 'أَنَا مِنْ مِصْرَ', transliteration: 'Ana min Misr' },
+      { id: 'opt2', text: 'بِخَيْرٍ وَالْحَمْدُ لِلَّهِ', transliteration: 'Bikhayrin walhamdulillah' },
+      { id: 'opt3', text: 'اسْمِي خَالِدٌ', transliteration: 'Ismi Khalid' },
+      { id: 'opt4', text: 'هُوَ مُدَرِّسٌ', transliteration: 'Huwa mudarris' },
     ],
     correct_answer: 'opt2',
-    explanation: 'حرف الثاء (ث) يخرج من طرف اللسان مع الثنايا العليا وتزينه 3 نقاط.',
+    explanation: 'حوار خالد وخليل (العربية بين يديك): كيف حالك؟ - بخير والحمد لله.',
     order_index: 2,
   },
   {
-    id: 'ex-3',
+    id: 'by-ex-3',
     lesson_id: 'l-1',
-    question_text: 'استمع لصوت حرف الحاء الحلقي الصافي (وسط الحلق):',
-    arabic_text: 'ح',
-    transliteration: 'Haa',
-    translation: 'Letter Haa',
+    question_text: 'استمع لسؤال الجنسية: (مِنْ أَيْنَ أَنْتَ؟) - ما هي الإجابة المطابقة للصوت المسموع؟',
+    arabic_text: 'أَنَا مِنْ مِصْرَ، أَنَا مِصْرِيٌّ',
+    transliteration: 'Ana min Misr, ana misriyy',
+    translation: 'I am from Egypt, I am Egyptian',
     question_type: 'audio_mcq',
-    audio_url: '/audio/letters/haa.mp3',
+    audio_url: '/audio/bayna-yadayk/min_ayna_anta.mp3',
     options_json: [
-      { id: 'opt1', text: 'هـ', transliteration: 'Haa (الصدر خفيفة)' },
-      { id: 'opt2', text: 'خ', transliteration: 'Khaa (الحلق مع شخير)' },
-      { id: 'opt3', text: 'ح', transliteration: 'Haa (وسط الحلق نقية)' },
-      { id: 'opt4', text: 'ع', transliteration: 'Ayn (عصر الحلق)' },
+      { id: 'opt1', text: 'أَنَا مِنْ مِصْرَ، أَنَا مِصْرِيٌّ', transliteration: 'Ana min Misr, ana misriyy' },
+      { id: 'opt2', text: 'أَنَا مِنْ تُرْكِيَا، أَنَا تُرْكِيٌّ', transliteration: 'Ana min Turkiya, ana turkiyy' },
+      { id: 'opt3', text: 'أَنَا مِنْ سُورِيَا، أَنَا سُورِيٌّ', transliteration: 'Ana min Suriya, ana suriyy' },
+      { id: 'opt4', text: 'أَنَا مِنْ بَاكِسْتَانَ', transliteration: 'Ana min Pakistan' },
     ],
-    correct_answer: 'opt3',
-    explanation: 'حرف الحاء (ح) يخرج من وسط الحلق بدون نقاط بنَفَس نقي وصوت رخو.',
+    correct_answer: 'opt1',
+    explanation: 'الحوار الثاني في كتاب العربية بين يديك: من أين أنت؟ أنا من مصر، وأنا مصري.',
     order_index: 3,
+  },
+  {
+    id: 'by-ex-4',
+    lesson_id: 'l-2',
+    question_text: 'استمع إلى مفردات شجرة الأسرة (الوحدة الثانية): حدد الوالدين المذكورين:',
+    arabic_text: 'الأَبُ عَدْنَان، وَالأُمُّ خَدِيجَة',
+    transliteration: 'Al-Abu Adnan, wal-Ummu Khadijah',
+    translation: 'The father is Adnan, and the mother is Khadijah',
+    question_type: 'audio_mcq',
+    audio_url: '/audio/bayna-yadayk/shajarat_usrah.mp3',
+    options_json: [
+      { id: 'opt1', text: 'الأَبُ عَدْنَان، وَالأُمُّ خَدِيجَة', transliteration: 'Al-Abu Adnan, wal-Ummu Khadijah' },
+      { id: 'opt2', text: 'الأَخُ عُمَر، وَالأُخْتُ فَاطِمَة', transliteration: 'Al-Akhu Umar, wal-Ukhtu Fatimah' },
+      { id: 'opt3', text: 'الْجَدُّ حَسَن، وَالْجَدَّةُ مَرْيَم', transliteration: 'Al-Jaddu Hasan, wal-Jaddatu Maryam' },
+      { id: 'opt4', text: 'الابْنُ عَلِيّ، وَالابْنَةُ عَائِشَة', transliteration: 'Al-Ibnu Ali, wal-Ibnatu Aishah' },
+    ],
+    correct_answer: 'opt1',
+    explanation: 'شجرة الأسرة في كتاب العربية بين يديك: هذا والدي عدنان، وهذه والدتي خديجة.',
+    order_index: 4,
   },
 ];
 
 export default function HomePage() {
   const [currentIdx, setCurrentIdx] = useState(0);
 
-  const currentExercise = SAMPLE_EXERCISES[currentIdx];
+  const currentExercise = BAYNA_YADAYK_SAMPLE_EXERCISES[currentIdx];
 
   const handleNext = () => {
-    setCurrentIdx((prev) => (prev + 1) % SAMPLE_EXERCISES.length);
+    setCurrentIdx((prev) => (prev + 1) % BAYNA_YADAYK_SAMPLE_EXERCISES.length);
   };
 
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center" dir="rtl">
+      {/* Top Marketing Alert Bar */}
+      <div className="w-full bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 text-white py-2.5 px-4 text-center text-xs sm:text-sm font-bold shadow-xs flex items-center justify-center gap-2">
+        <Gift className="w-4 h-4 text-amber-300 animate-bounce" />
+        <span>عرض الانطلاق التسويقي: ابدأ دراسة وحدات (العربية بين يديك) الأولى مجاناً 100% بدون أي رسوم!</span>
+        <Link href="/learn" className="underline hover:text-amber-200 transition-colors mr-2">
+          ابدأ التجربة المجانية الآن ←
+        </Link>
+      </div>
+
       {/* Hero Section */}
       <section className="w-full max-w-6xl mx-auto px-4 sm:px-6 pt-12 pb-14 text-center">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold mb-6 border border-emerald-200">
           <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-          <span>منصة بيان: تعليم العربية والقرآن الكريم التفاعلية</span>
+          <span>المنهج العالمي المعتمد: سلسلة (العربية بين يديك - الكتاب الأول)</span>
         </div>
 
         <h1 className="text-4xl sm:text-6xl font-extrabold text-slate-900 tracking-tight max-w-4xl mx-auto leading-tight font-arabic">
-          من الصفر إلى تلاوة وفهم القرآن الكريم في{' '}
+          تعلّم العربية وتحدث بها بطلاقة عبر منهج{' '}
           <span className="text-emerald-600 underline decoration-emerald-300 decoration-wavy decoration-2">
-            أسابيع معدودة
+            (العربية بين يديك)
           </span>
         </h1>
 
         <p className="mt-5 text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
-          نظام تعليمي متكامل لغير الناطقين بالعربية: تمييز المخارج والحركات (الفتحة والضمة والكسرة) مع مشغل صوت تفاعلي بنصف السرعة ولوحة تحكم شاملة لإدارة المنهج.
+          منصة تفاعلية متكاملة مصممة خصيصاً لتدريس الكتاب الأول من سلسلة (العربية بين يديك). استمع للحوارات والنطق الصوتي، وتدرب على التراكيب النحوية والمفردات مع تصحيح فوري ومكافآت يومية.
         </p>
 
         <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
           <Link
-            href="/admin"
-            className="px-6 py-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm sm:text-base shadow-lg transition-all flex items-center gap-2 cursor-pointer"
+            href="/learn"
+            className="px-7 py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm sm:text-base shadow-xl shadow-emerald-200 hover:shadow-2xl transition-all flex items-center gap-2.5 cursor-pointer"
           >
-            <LayoutDashboard className="w-4 h-4 text-emerald-400" />
-            <span>الدخول إلى لوحة التحكم (Admin Panel)</span>
+            <BookOpen className="w-5 h-5" />
+            <span>ابدأ الدروس المجانية فوراً (Free Trial)</span>
+            <ArrowLeft className="w-4 h-4" />
           </Link>
 
           <Link
-            href="/learn"
-            className="px-6 py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm sm:text-base shadow-lg shadow-emerald-200 hover:shadow-xl transition-all flex items-center gap-2 cursor-pointer"
+            href="/admin"
+            className="px-6 py-4 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm sm:text-base shadow-lg transition-all flex items-center gap-2 cursor-pointer"
           >
-            <BookOpen className="w-4 h-4" />
-            <span>ابدأ المستوى التمهيدي مجاناً</span>
+            <LayoutDashboard className="w-4 h-4 text-emerald-400" />
+            <span>لوحة تحكم المشرفين (AdminLTE)</span>
           </Link>
         </div>
       </section>
@@ -119,16 +148,16 @@ export default function HomePage() {
         <div className="max-w-3xl mx-auto px-4">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-600 flex items-center gap-1">
-                <Volume2 className="w-3.5 h-3.5" />
-                <span>تجربة حية للمشغل الصوتي (Audio Player)</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 flex items-center gap-1.5">
+                <Volume2 className="w-4 h-4" />
+                <span>نموذج تجريبي تفاعلي من الكتاب الأول</span>
               </span>
-              <h3 className="text-xl font-bold text-slate-900 font-arabic mt-0.5">
-                اضغط على زر الصوت واستمع للنطق الحقيقي
+              <h3 className="text-xl font-bold text-slate-900 font-arabic mt-1">
+                جرب الاستماع للحوار الأول الآن واختبر إجابتك:
               </h3>
             </div>
-            <div className="text-xs text-slate-500 font-medium">
-              تمرين {currentIdx + 1} من {SAMPLE_EXERCISES.length}
+            <div className="text-xs text-slate-500 font-medium bg-slate-100 px-3 py-1 rounded-full">
+              تمرين {currentIdx + 1} من {BAYNA_YADAYK_SAMPLE_EXERCISES.length}
             </div>
           </div>
 
@@ -142,92 +171,71 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Curriculum Pathway Grid */}
+      {/* Free Trial Marketing Features Grid */}
       <section className="w-full max-w-6xl mx-auto px-4 sm:px-6 py-16">
         <div className="text-center max-w-2xl mx-auto mb-12">
-          <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">
-            المنهج التعليمي المتدرج
+          <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full">
+            لماذا نبدأ بـ (العربية بين يديك)؟
           </span>
-          <h2 className="text-3xl font-bold text-slate-900 mt-1 font-arabic">
-            بناء الفهم القرآني خطوة بخطوة
+          <h2 className="text-3xl font-bold text-slate-900 mt-3 font-arabic">
+            خطة دراسية منظمة خطوة بخطوة
           </h2>
           <p className="text-sm text-slate-500 mt-2">
-            من الحروف المجردة إلى فهم وتدبر سورة الفاتحة وأذكار الصلاة.
+            تم ترتيب محتوى الوحدات والدروس ليتطابق مع الفهرس المعتمد للكتاب الأول ليتمكن أي طالب من البدء فوراً.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
-          {/* Level Pre-A1 */}
-          <div className="p-8 rounded-3xl bg-white border border-slate-200 shadow-sm relative overflow-hidden">
-            <div className="absolute top-6 left-6 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">
-              متاح مجاناً 100%
-            </div>
-            <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-lg mb-4">
-              0
-            </div>
-            <h3 className="text-xl font-bold text-slate-900 font-arabic">المستوى التمهيدي (Pre-A1): أساسيات القراءة</h3>
-            <p className="text-slate-500 text-sm mt-2">
-              التعرف الصوتي والبصري على الحروف ومخارجها والحركات القصيرة والطويلة.
-            </p>
-
-            <ul className="mt-6 space-y-3 text-sm text-slate-600">
-              <li className="flex items-center gap-2.5">
-                <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>28 حرفاً بأشكالها (أول، ووسط، وآخر الكلمة والمفردة)</span>
-              </li>
-              <li className="flex items-center gap-2.5">
-                <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>الحركات القصيرة (فتحة، كسرة، ضمة) وحروف المد</span>
-              </li>
-              <li className="flex items-center gap-2.5">
-                <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>السكون والشدة والتنوين وقواعد الابتداء</span>
-              </li>
-            </ul>
-
-            <Link
-              href="/learn"
-              className="mt-8 block text-center py-3 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-bold text-sm transition-colors cursor-pointer"
-            >
-              دخول المستوى مجاناً
-            </Link>
-          </div>
-
-          {/* Level A1 */}
-          <div className="p-8 rounded-3xl bg-white border-2 border-emerald-500 shadow-md relative overflow-hidden">
-            <div className="absolute top-6 left-6 px-3 py-1 rounded-full bg-emerald-600 text-white text-xs font-bold shadow-xs">
-              اشتراك Pro
-            </div>
-            <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-bold text-lg mb-4 shadow-sm shadow-emerald-200">
+        <div className="grid md:grid-cols-3 gap-6">
+          {/* Feature 1 */}
+          <div className="p-6 rounded-3xl bg-white border border-slate-200 shadow-xs hover:border-emerald-500 transition-all">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-xl mb-4">
               1
             </div>
-            <h3 className="text-xl font-bold text-slate-900 font-arabic">المستوى الأول (A1): معجم القرآن وسورة الفاتحة</h3>
-            <p className="text-slate-500 text-sm mt-2">
-              فهم الكلمات الأكثر تكراراً في كتاب الله وتطبيق التلاوة الصحيحة.
+            <h3 className="font-bold text-lg text-slate-900 font-arabic mb-2">حوارات صوتية حية</h3>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              استماع لجميع حوارات الوحدات (التحية والتعارف، الأسرة، السكن) مع إمكانية إبطاء السرعة إلى 0.75x لتسهيل تمييز المخارج.
             </p>
-
-            <ul className="mt-6 space-y-3 text-sm text-slate-600">
-              <li className="flex items-center gap-2.5">
-                <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>تفسير ومفردات سورة الفاتحة كلمة بكلمة بالصوت</span>
-              </li>
-              <li className="flex items-center gap-2.5">
-                <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>أهم 500 كلمة تشكل 80% من نصوص القرآن الكريم</span>
-              </li>
-              <li className="flex items-center gap-2.5">
-                <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>نظام التكرار المتباعد (SRS) لترسيخ المفردات في الذاكرة</span>
-              </li>
-            </ul>
-
-            <Link
-              href="/pricing"
-              className="mt-8 block text-center py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md shadow-emerald-200 transition-colors cursor-pointer"
-            >
-              فتح كامل المحتوى
-            </Link>
           </div>
+
+          {/* Feature 2 */}
+          <div className="p-6 rounded-3xl bg-white border border-slate-200 shadow-xs hover:border-emerald-500 transition-all">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-xl mb-4">
+              2
+            </div>
+            <h3 className="font-bold text-lg text-slate-900 font-arabic mb-2">دروس تجريبية مفتوحة 100%</h3>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              الوحدة الأولى والوحدة الثانية متاحتان بالكامل مجاناً لكل زائر لتجربة جودة المنصة والتأكد من ملاءمتها قبل الاشتراك.
+            </p>
+          </div>
+
+          {/* Feature 3 */}
+          <div className="p-6 rounded-3xl bg-white border border-slate-200 shadow-xs hover:border-emerald-500 transition-all">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-xl mb-4">
+              3
+            </div>
+            <h3 className="font-bold text-lg text-slate-900 font-arabic mb-2">متابعة التتابع والنقاط</h3>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              نظام تحفيزي يحسب أيام التتابع اليومي (Streak) ومكافآت نقاط الخبرة (XP) مع كل تمرين يتم حله بنجاح.
+            </p>
+          </div>
+        </div>
+
+        {/* Free Access CTA Box */}
+        <div className="mt-12 p-8 rounded-3xl bg-gradient-to-r from-emerald-900 via-emerald-800 to-slate-900 text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
+          <div>
+            <span className="text-xs font-bold text-emerald-300 uppercase tracking-wider block mb-1">جاهزون للانطلاق</span>
+            <h3 className="text-2xl font-bold font-arabic">ابدأ دراسة الوحدة الأولى الآن مجاناً</h3>
+            <p className="text-xs text-emerald-100/80 mt-1 max-w-lg">
+              لا داعي للانتظار، اضغط على الرابط بالأسفل لتجد دروس كتاب (العربية بين يديك) مفهرسة وجاهزة للاستخدام الفوري.
+            </p>
+          </div>
+
+          <Link
+            href="/learn"
+            className="px-8 py-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-sm transition-all shadow-lg shrink-0 cursor-pointer"
+          >
+            دخول الدروس المجانية الآن ←
+          </Link>
         </div>
       </section>
     </div>
