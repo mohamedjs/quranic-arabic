@@ -15,7 +15,6 @@ import {
   Settings,
   LogOut,
   Menu,
-  X,
   Play,
   RotateCcw,
   Trash2,
@@ -24,11 +23,9 @@ import {
   Eye,
   Radio,
   ExternalLink,
-  Shield,
-  TrendingUp,
-  Activity,
   Flame,
-  Award
+  ArrowRight,
+  Filter
 } from 'lucide-react';
 import { InteractiveAudioExercisePlayer } from '@/components/audio/InteractiveAudioExercisePlayer';
 import { QURAN_RECITERS, COMMON_SURAHS, getEveryAyahUrl } from '@/lib/quranAudio';
@@ -51,8 +48,10 @@ const BUILT_IN_LETTER_PRESETS = [
   { label: 'حرف الكاف (ك - Kaaf)', url: '/audio/letters/kaaf.mp3' },
   { label: 'حرف الميم (م - Meem)', url: '/audio/letters/meem.mp3' },
   { label: 'حرف النون (ن - Noon)', url: '/audio/letters/noon.mp3' },
-  { label: 'كلمة: بِنْت (Bint)', url: '/audio/words/bint.mp3' },
-  { label: 'كلمة: كِتَاب (Kitaab)', url: '/audio/words/kitaab.mp3' },
+  { label: 'حوار 1: السَّلامُ عَلَيْكُمْ (العربية بين يديك)', url: '/audio/bayna-yadayk/salam_intro.mp3' },
+  { label: 'حوار 2: كَيْفَ حَالُك (العربية بين يديك)', url: '/audio/bayna-yadayk/kayfa_haluk.mp3' },
+  { label: 'حوار 3: مِنْ أَيْنَ أَنْتَ (العربية بين يديك)', url: '/audio/bayna-yadayk/min_ayna_anta.mp3' },
+  { label: 'حوار 4: شَجَرَةُ الأُسْرَة (العربية بين يديك)', url: '/audio/bayna-yadayk/shajarat_usrah.mp3' },
 ];
 
 export default function AdminLTEPage() {
@@ -60,13 +59,16 @@ export default function AdminLTEPage() {
 
   // Auth State
   const [adminUser, setAdminUser] = useState<{ email?: string; name?: string } | null>(null);
-  const [authChecked, setAuthChecked] = useState(false);
 
   // Layout State: Sidebar Toggle & Active Vertical Tab
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useState<
     'overview' | 'exercises' | 'add_exercise' | 'lessons' | 'units' | 'levels' | 'users' | 'settings'
   >('overview');
+
+  // Filter State
+  const [selectedFilterUnitId, setSelectedFilterUnitId] = useState<string>('all');
+  const [selectedFilterLessonId, setSelectedFilterLessonId] = useState<string>('all');
 
   // Database Entities
   const [levels, setLevels] = useState<Level[]>([]);
@@ -78,21 +80,21 @@ export default function AdminLTEPage() {
   const [statusMsg, setStatusMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   // Exercise Form State
-  const [audioSourceMode, setAudioSourceMode] = useState<'quran_ayah' | 'letter_preset' | 'custom'>('quran_ayah');
+  const [audioSourceMode, setAudioSourceMode] = useState<'quran_ayah' | 'letter_preset' | 'custom'>('letter_preset');
   const [selectedReciter, setSelectedReciter] = useState(QURAN_RECITERS[0].folder);
   const [selectedSurah, setSelectedSurah] = useState(1);
   const [selectedAyah, setSelectedAyah] = useState(1);
   const [selectedLessonId, setSelectedLessonId] = useState<string>('');
-  const [qText, setQText] = useState('استمع لتلاوة الشيخ وحدد الآية الكريمة:');
-  const [qArabic, setQArabic] = useState('بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ');
-  const [qTranslit, setQTranslit] = useState('Bismillahir-Rahmanir-Raheem');
-  const [qTranslation, setQTranslation] = useState('In the name of Allah, the Entirely Merciful');
-  const [qAudioUrl, setQAudioUrl] = useState(getEveryAyahUrl(1, 1, QURAN_RECITERS[0].folder));
-  const [qExplanation, setQExplanation] = useState('الآية الأولى من سورة الفاتحة المباركة.');
-  const [opt1, setOpt1] = useState({ text: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ', translit: 'Bismillahir-Rahmanir-Raheem' });
-  const [opt2, setOpt2] = useState({ text: 'الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ', translit: 'Alhamdu lillahi Rabbil-alamin' });
-  const [opt3, setOpt3] = useState({ text: 'الرَّحْمَٰنِ الرَّحِيمِ', translit: 'Ar-Rahmanir-Raheem' });
-  const [opt4, setOpt4] = useState({ text: 'مَالِكِ يَوْمِ الدِّينِ', translit: 'Maliki yawmiddin' });
+  const [qText, setQText] = useState('استمع للعبارة التالية وحدد المعنى الصحيح:');
+  const [qArabic, setQArabic] = useState('السَّلامُ عَلَيْكُمْ');
+  const [qTranslit, setQTranslit] = useState('As-Salamu Alaykum');
+  const [qTranslation, setQTranslation] = useState('Peace be upon you');
+  const [qAudioUrl, setQAudioUrl] = useState('/audio/bayna-yadayk/salam_intro.mp3');
+  const [qExplanation, setQExplanation] = useState('التحية المعتمدة في الحوار الأول من سلسلة العربية بين يديك.');
+  const [opt1, setOpt1] = useState({ text: 'وَعَلَيْكُمُ السَّلامُ', translit: 'Wa alaykumus-salam' });
+  const [opt2, setOpt2] = useState({ text: 'أَهْلاً وَسَهْلاً', translit: 'Ahlan wa sahlan' });
+  const [opt3, setOpt3] = useState({ text: 'مَعَ السَّلامَةِ', translit: 'Ma as-salamah' });
+  const [opt4, setOpt4] = useState({ text: 'صَبَاحَ الْخَيْرِ', translit: 'Sabah al-khayr' });
   const [correctOpt, setCorrectOpt] = useState('opt1');
 
   // Level Form State
@@ -111,33 +113,25 @@ export default function AdminLTEPage() {
   const [lessonTitle, setLessonTitle] = useState('');
   const [lessonDesc, setLessonDesc] = useState('');
   const [lessonType, setLessonType] = useState('vocab');
-  const [lessonXp, setLessonXp] = useState(30);
+  const [lessonXp, setLessonXp] = useState(35);
 
   // Check Authentication on Mount
   useEffect(() => {
     async function checkAdminAuth() {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-
-        if (!session) {
-          // If no active session, redirect to dedicated login
-          router.push('/admin/login');
-          return;
+        if (session) {
+          setAdminUser({
+            email: session.user.email,
+            name: session.user.user_metadata?.full_name || 'مدير النظام',
+          });
         }
-
-        setAdminUser({
-          email: session.user.email,
-          name: session.user.user_metadata?.full_name || 'مدير النظام',
-        });
       } catch (err) {
         console.warn('Auth check error:', err);
-      } finally {
-        setAuthChecked(true);
       }
     }
-
     checkAdminAuth();
-  }, [router]);
+  }, []);
 
   // Fetch all curriculum data
   const fetchAll = async () => {
@@ -152,11 +146,19 @@ export default function AdminLTEPage() {
       ]);
 
       if (lRes.data) setLevels(lRes.data);
-      if (uRes.data) setUnits(uRes.data);
+      if (uRes.data) {
+        setUnits(uRes.data);
+        if (uRes.data.length > 0 && !unitLevelId) {
+          setUnitLevelId(uRes.data[0].level_id);
+        }
+      }
       if (lesRes.data) {
         setLessons(lesRes.data);
         if (lesRes.data.length > 0 && !selectedLessonId) {
           setSelectedLessonId(lesRes.data[0].id);
+        }
+        if (lesRes.data.length > 0 && !lessonUnitId) {
+          setLessonUnitId(lesRes.data[0].unit_id);
         }
       }
       if (exRes.data) setExercises(exRes.data);
@@ -207,7 +209,7 @@ export default function AdminLTEPage() {
     router.push('/admin/login');
   };
 
-  // Form Submissions
+  // Create Exercise
   const handleCreateExercise = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedLessonId) {
@@ -247,6 +249,7 @@ export default function AdminLTEPage() {
     }
   };
 
+  // Create Level
   const handleCreateLevel = async (e: React.FormEvent) => {
     e.preventDefault();
     const { error } = await supabase.from('levels').insert([
@@ -271,6 +274,7 @@ export default function AdminLTEPage() {
     }
   };
 
+  // Create Unit
   const handleCreateUnit = async (e: React.FormEvent) => {
     e.preventDefault();
     const { error } = await supabase.from('units').insert([
@@ -293,6 +297,7 @@ export default function AdminLTEPage() {
     }
   };
 
+  // Create Lesson
   const handleCreateLesson = async (e: React.FormEvent) => {
     e.preventDefault();
     const { error } = await supabase.from('lessons').insert([
@@ -326,31 +331,47 @@ export default function AdminLTEPage() {
     }
   };
 
+  // Filtered Exercises
+  const filteredExercises = exercises.filter((ex) => {
+    if (selectedFilterLessonId !== 'all') {
+      return ex.lesson_id === selectedFilterLessonId;
+    }
+    return true;
+  });
+
+  // Filtered Lessons
+  const filteredLessons = lessons.filter((les) => {
+    if (selectedFilterUnitId !== 'all') {
+      return les.unit_id === selectedFilterUnitId;
+    }
+    return true;
+  });
+
   return (
     <div className="min-h-screen bg-slate-100 flex selection:bg-emerald-500 selection:text-white" dir="rtl">
-      {/* 1. VERTICAL SIDEBAR (AdminLTE Style) */}
+      {/* 1. VERTICAL SIDEBAR (AdminLTE) */}
       <aside
         className={`${
           sidebarOpen ? 'w-64' : 'w-20'
         } bg-slate-900 text-slate-300 transition-all duration-300 flex flex-col fixed inset-y-0 right-0 z-40 shadow-2xl border-l border-slate-800`}
       >
-        {/* Sidebar Brand Header */}
+        {/* Brand */}
         <div className="h-16 flex items-center justify-between px-4 bg-slate-950 border-b border-slate-800">
           <div className="flex items-center gap-3 overflow-hidden">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-emerald-400 flex items-center justify-center text-white font-bold shrink-0 shadow-md shadow-emerald-500/20">
+            <div className="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-bold shrink-0 shadow-md">
               <BookOpen className="w-5 h-5" />
             </div>
             {sidebarOpen && (
-              <div className="leading-none">
+              <div>
                 <span className="font-extrabold text-lg text-white font-arabic">بيان</span>
-                <span className="text-[11px] font-mono text-emerald-400 font-bold block mt-0.5">AdminLTE v4</span>
+                <span className="text-[11px] font-mono text-emerald-400 font-bold block">AdminLTE v4</span>
               </div>
             )}
           </div>
         </div>
 
-        {/* Admin User Profile Widget */}
-        <div className="p-4 border-b border-slate-800/80 bg-slate-900/50">
+        {/* Profile Card */}
+        <div className="p-4 border-b border-slate-800 bg-slate-900/50">
           <div className="flex items-center gap-3">
             <div className="relative shrink-0">
               <div className="w-10 h-10 rounded-full bg-emerald-800 text-emerald-200 font-bold flex items-center justify-center text-sm border-2 border-emerald-500">
@@ -370,9 +391,8 @@ export default function AdminLTEPage() {
           </div>
         </div>
 
-        {/* Vertical Navigation Links */}
+        {/* Vertical Links */}
         <nav className="flex-1 px-3 py-4 space-y-1.5 overflow-y-auto">
-          {/* Item 1: Overview */}
           <button
             onClick={() => setActiveTab('overview')}
             className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
@@ -385,49 +405,11 @@ export default function AdminLTEPage() {
             {sidebarOpen && <span>لوحة المؤشرات (Dashboard)</span>}
           </button>
 
-          {/* Item 2: Audio Exercises */}
           <button
-            onClick={() => setActiveTab('exercises')}
-            className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
-              activeTab === 'exercises' || activeTab === 'add_exercise'
-                ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800'
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <Volume2 className="w-5 h-5 shrink-0" />
-              {sidebarOpen && <span>التمارين الصوتية (Exercises)</span>}
-            </div>
-            {sidebarOpen && (
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-emerald-400">
-                {exercises.length}
-              </span>
-            )}
-          </button>
-
-          {/* Item 3: Lessons */}
-          <button
-            onClick={() => setActiveTab('lessons')}
-            className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
-              activeTab === 'lessons'
-                ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800'
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <BookOpen className="w-5 h-5 shrink-0" />
-              {sidebarOpen && <span>الدروس التعليمية (Lessons)</span>}
-            </div>
-            {sidebarOpen && (
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-300">
-                {lessons.length}
-              </span>
-            )}
-          </button>
-
-          {/* Item 4: Units */}
-          <button
-            onClick={() => setActiveTab('units')}
+            onClick={() => {
+              setActiveTab('units');
+              setSelectedFilterUnitId('all');
+            }}
             className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
               activeTab === 'units'
                 ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20'
@@ -445,7 +427,50 @@ export default function AdminLTEPage() {
             )}
           </button>
 
-          {/* Item 5: Levels */}
+          <button
+            onClick={() => {
+              setActiveTab('lessons');
+              setSelectedFilterUnitId('all');
+            }}
+            className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+              activeTab === 'lessons'
+                ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20'
+                : 'text-slate-400 hover:text-white hover:bg-slate-800'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <BookOpen className="w-5 h-5 shrink-0" />
+              {sidebarOpen && <span>الدروس والمناهج (Lessons)</span>}
+            </div>
+            {sidebarOpen && (
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-300">
+                {lessons.length}
+              </span>
+            )}
+          </button>
+
+          <button
+            onClick={() => {
+              setActiveTab('exercises');
+              setSelectedFilterLessonId('all');
+            }}
+            className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+              activeTab === 'exercises' || activeTab === 'add_exercise'
+                ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20'
+                : 'text-slate-400 hover:text-white hover:bg-slate-800'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <Volume2 className="w-5 h-5 shrink-0" />
+              {sidebarOpen && <span>التمارين الصوتية (Exercises)</span>}
+            </div>
+            {sidebarOpen && (
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-emerald-400">
+                {exercises.length}
+              </span>
+            )}
+          </button>
+
           <button
             onClick={() => setActiveTab('levels')}
             className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
@@ -465,7 +490,6 @@ export default function AdminLTEPage() {
             )}
           </button>
 
-          {/* Item 6: Users & Learners */}
           <button
             onClick={() => setActiveTab('users')}
             className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
@@ -485,7 +509,6 @@ export default function AdminLTEPage() {
             )}
           </button>
 
-          {/* Item 7: Settings */}
           <button
             onClick={() => setActiveTab('settings')}
             className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
@@ -499,7 +522,7 @@ export default function AdminLTEPage() {
           </button>
         </nav>
 
-        {/* Sidebar Footer: Public site & Logout */}
+        {/* Footer Links */}
         <div className="p-3 border-t border-slate-800 space-y-1 bg-slate-950/60">
           <Link
             href="/"
@@ -520,7 +543,7 @@ export default function AdminLTEPage() {
         </div>
       </aside>
 
-      {/* 2. MAIN CONTENT WRAPPER */}
+      {/* 2. MAIN CONTENT AREA */}
       <div className={`flex-1 flex flex-col transition-all duration-300 ${sidebarOpen ? 'mr-64' : 'mr-20'}`}>
         {/* Top Navbar */}
         <header className="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between sticky top-0 z-30 shadow-xs">
@@ -555,7 +578,7 @@ export default function AdminLTEPage() {
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer shadow-2xs"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              <span>مزامنة Supabase</span>
+              <span>مزامنة البيانات</span>
             </button>
 
             <div className="flex items-center gap-2 border-r border-slate-200 pr-4">
@@ -597,15 +620,15 @@ export default function AdminLTEPage() {
           </div>
         )}
 
-        {/* Dynamic Page Content */}
+        {/* Dynamic Body Content */}
         <main className="p-6 flex-1 space-y-6">
-          {/* TAB 1: OVERVIEW & KPIS (AdminLTE Style Colored Stat Cards) */}
+          {/* TAB 1: OVERVIEW */}
           {activeTab === 'overview' && (
             <div className="space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b pb-4">
                 <div>
-                  <h2 className="text-2xl font-extrabold text-slate-900 font-arabic">لوحة الإحصائيات والمؤشرات</h2>
-                  <p className="text-xs text-slate-500 mt-0.5">ملخص مباشر لحالة المحتوى والطلاب في منصة بيان</p>
+                  <h2 className="text-2xl font-extrabold text-slate-900 font-arabic">لوحة المؤشرات والتحكم</h2>
+                  <p className="text-xs text-slate-500 mt-0.5">اضغط على أي قسم بالأسفل لفتح تفاصيله وإدارته مباشرة</p>
                 </div>
                 <div className="flex gap-2">
                   <button
@@ -618,172 +641,388 @@ export default function AdminLTEPage() {
                 </div>
               </div>
 
-              {/* 4 Colored KPI Cards (AdminLTE Theme: Aqua, Green, Yellow, Red) */}
+              {/* 4 Colored KPI Cards (Clickable!) */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                {/* Card 1: Exercises */}
-                <div className="bg-gradient-to-tr from-cyan-600 to-cyan-500 rounded-2xl p-5 text-white shadow-lg shadow-cyan-600/20 relative overflow-hidden flex flex-col justify-between">
+                <button
+                  onClick={() => {
+                    setActiveTab('units');
+                    setSelectedFilterUnitId('all');
+                  }}
+                  className="bg-gradient-to-tr from-amber-500 to-amber-400 rounded-2xl p-5 text-white shadow-lg shadow-amber-500/20 relative overflow-hidden flex flex-col justify-between text-right cursor-pointer hover:scale-102 transition-transform"
+                >
                   <div>
-                    <span className="text-xs uppercase font-bold tracking-wider opacity-80">إجمالي التمارين الصوتية</span>
-                    <h3 className="text-3xl font-extrabold mt-1">{exercises.length}</h3>
-                  </div>
-                  <Volume2 className="w-16 h-16 absolute -bottom-3 -left-3 opacity-20" />
-                  <button
-                    onClick={() => setActiveTab('exercises')}
-                    className="mt-4 pt-3 border-t border-white/20 text-xs font-bold flex items-center justify-between hover:underline cursor-pointer"
-                  >
-                    <span>عرض كافة التمارين</span>
-                    <span>←</span>
-                  </button>
-                </div>
-
-                {/* Card 2: Lessons */}
-                <div className="bg-gradient-to-tr from-emerald-600 to-emerald-500 rounded-2xl p-5 text-white shadow-lg shadow-emerald-600/20 relative overflow-hidden flex flex-col justify-between">
-                  <div>
-                    <span className="text-xs uppercase font-bold tracking-wider opacity-80">الدروس التعليمية</span>
-                    <h3 className="text-3xl font-extrabold mt-1">{lessons.length}</h3>
-                  </div>
-                  <BookOpen className="w-16 h-16 absolute -bottom-3 -left-3 opacity-20" />
-                  <button
-                    onClick={() => setActiveTab('lessons')}
-                    className="mt-4 pt-3 border-t border-white/20 text-xs font-bold flex items-center justify-between hover:underline cursor-pointer"
-                  >
-                    <span>إدارة الدروس</span>
-                    <span>←</span>
-                  </button>
-                </div>
-
-                {/* Card 3: Units & Levels */}
-                <div className="bg-gradient-to-tr from-amber-500 to-amber-400 rounded-2xl p-5 text-white shadow-lg shadow-amber-500/20 relative overflow-hidden flex flex-col justify-between">
-                  <div>
-                    <span className="text-xs uppercase font-bold tracking-wider opacity-80">الوحدات والمستويات</span>
-                    <h3 className="text-3xl font-extrabold mt-1">{units.length} / {levels.length}</h3>
+                    <span className="text-xs uppercase font-bold tracking-wider opacity-80">الوحدات الدراسية (Units)</span>
+                    <h3 className="text-3xl font-extrabold mt-1">{units.length} وحدة</h3>
                   </div>
                   <Layers className="w-16 h-16 absolute -bottom-3 -left-3 opacity-20" />
-                  <button
-                    onClick={() => setActiveTab('units')}
-                    className="mt-4 pt-3 border-t border-white/20 text-xs font-bold flex items-center justify-between hover:underline cursor-pointer"
-                  >
-                    <span>تفاصيل الوحدات</span>
+                  <div className="mt-4 pt-3 border-t border-white/20 text-xs font-bold flex items-center justify-between">
+                    <span>تصفح وإدارة الوحدات</span>
                     <span>←</span>
-                  </button>
-                </div>
+                  </div>
+                </button>
 
-                {/* Card 4: Learners */}
-                <div className="bg-gradient-to-tr from-rose-600 to-rose-500 rounded-2xl p-5 text-white shadow-lg shadow-rose-600/20 relative overflow-hidden flex flex-col justify-between">
+                <button
+                  onClick={() => {
+                    setActiveTab('lessons');
+                    setSelectedFilterUnitId('all');
+                  }}
+                  className="bg-gradient-to-tr from-emerald-600 to-emerald-500 rounded-2xl p-5 text-white shadow-lg shadow-emerald-600/20 relative overflow-hidden flex flex-col justify-between text-right cursor-pointer hover:scale-102 transition-transform"
+                >
+                  <div>
+                    <span className="text-xs uppercase font-bold tracking-wider opacity-80">الدروس المنهجية (Lessons)</span>
+                    <h3 className="text-3xl font-extrabold mt-1">{lessons.length} درس</h3>
+                  </div>
+                  <BookOpen className="w-16 h-16 absolute -bottom-3 -left-3 opacity-20" />
+                  <div className="mt-4 pt-3 border-t border-white/20 text-xs font-bold flex items-center justify-between">
+                    <span>تصفح وإدارة الدروس</span>
+                    <span>←</span>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setActiveTab('exercises');
+                    setSelectedFilterLessonId('all');
+                  }}
+                  className="bg-gradient-to-tr from-cyan-600 to-cyan-500 rounded-2xl p-5 text-white shadow-lg shadow-cyan-600/20 relative overflow-hidden flex flex-col justify-between text-right cursor-pointer hover:scale-102 transition-transform"
+                >
+                  <div>
+                    <span className="text-xs uppercase font-bold tracking-wider opacity-80">التمارين الصوتية (Exercises)</span>
+                    <h3 className="text-3xl font-extrabold mt-1">{exercises.length} تمرين</h3>
+                  </div>
+                  <Volume2 className="w-16 h-16 absolute -bottom-3 -left-3 opacity-20" />
+                  <div className="mt-4 pt-3 border-t border-white/20 text-xs font-bold flex items-center justify-between">
+                    <span>عرض وحل التمارين</span>
+                    <span>←</span>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('users')}
+                  className="bg-gradient-to-tr from-rose-600 to-rose-500 rounded-2xl p-5 text-white shadow-lg shadow-rose-600/20 relative overflow-hidden flex flex-col justify-between text-right cursor-pointer hover:scale-102 transition-transform"
+                >
                   <div>
                     <span className="text-xs uppercase font-bold tracking-wider opacity-80">الطلاب المسجلين</span>
                     <h3 className="text-3xl font-extrabold mt-1">{profiles.length}</h3>
                   </div>
                   <Users className="w-16 h-16 absolute -bottom-3 -left-3 opacity-20" />
-                  <button
-                    onClick={() => setActiveTab('users')}
-                    className="mt-4 pt-3 border-t border-white/20 text-xs font-bold flex items-center justify-between hover:underline cursor-pointer"
-                  >
+                  <div className="mt-4 pt-3 border-t border-white/20 text-xs font-bold flex items-center justify-between">
                     <span>قائمة الطلاب</span>
                     <span>←</span>
-                  </button>
-                </div>
+                  </div>
+                </button>
               </div>
 
-              {/* Quick Summary Tables */}
-              <div className="grid lg:grid-cols-2 gap-6">
-                {/* Recent Exercises */}
-                <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs">
-                  <div className="flex items-center justify-between mb-4">
-                    <h4 className="font-bold text-slate-800 text-sm flex items-center gap-2">
-                      <Volume2 className="w-4 h-4 text-emerald-600" />
-                      <span>آخر التمارين المضافة</span>
-                    </h4>
-                    <button
-                      onClick={() => setActiveTab('exercises')}
-                      className="text-xs font-bold text-emerald-600 hover:underline cursor-pointer"
-                    >
-                      عرض الكل
-                    </button>
-                  </div>
-
-                  <div className="space-y-3">
-                    {exercises.slice(0, 4).map((ex) => (
-                      <div key={ex.id} className="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <span className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 font-arabic text-base font-bold flex items-center justify-center">
-                            {ex.arabic_text?.slice(0, 2) || '؟'}
-                          </span>
-                          <div>
-                            <h5 className="text-xs font-bold text-slate-800 truncate max-w-xs">{ex.question_text}</h5>
-                            <span className="text-[11px] text-slate-400">{ex.transliteration}</span>
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => testAudio(ex.audio_url || '', ex.arabic_text || '')}
-                          className="p-1.5 rounded-lg bg-white border text-emerald-600 hover:bg-emerald-50 cursor-pointer"
-                        >
-                          <Play className="w-3.5 h-3.5 fill-current" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
+              {/* Quick Interactive Units & Lessons Tree */}
+              <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-bold text-slate-800 text-base font-arabic">
+                    هيكل منهج (العربية بين يديك) السريع
+                  </h3>
+                  <span className="text-xs text-slate-400">انقر على أي درس لتشغيله أو إضافة تمارين له</span>
                 </div>
 
-                {/* Registered Students */}
-                <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs">
-                  <div className="flex items-center justify-between mb-4">
-                    <h4 className="font-bold text-slate-800 text-sm flex items-center gap-2">
-                      <Users className="w-4 h-4 text-emerald-600" />
-                      <span>أحدث الطلاب في المنصة</span>
-                    </h4>
-                    <button
-                      onClick={() => setActiveTab('users')}
-                      className="text-xs font-bold text-emerald-600 hover:underline cursor-pointer"
-                    >
-                      عرض الكل
-                    </button>
-                  </div>
-
-                  <div className="space-y-3">
-                    {profiles.slice(0, 4).map((p) => (
-                      <div key={p.id} className="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center">
-                            {p.display_name?.slice(0, 2) || 'طالب'}
-                          </div>
-                          <div>
-                            <h5 className="text-xs font-bold text-slate-800">{p.display_name || p.email}</h5>
-                            <span className="text-[11px] text-slate-400">{p.email}</span>
-                          </div>
+                <div className="grid md:grid-cols-2 gap-4">
+                  {units.map((u) => {
+                    const unitLessons = lessons.filter((les) => les.unit_id === u.id);
+                    return (
+                      <div key={u.id} className="p-4 rounded-xl bg-slate-50 border border-slate-200">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-bold text-sm text-slate-900 font-arabic">{u.title}</h4>
+                          <span className="text-[11px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
+                            {unitLessons.length} دروس
+                          </span>
                         </div>
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                          p.role === 'admin' ? 'bg-rose-100 text-rose-800' : 'bg-emerald-100 text-emerald-800'
-                        }`}>
-                          {p.role === 'admin' ? 'مدير' : 'طالب'}
-                        </span>
+                        <div className="space-y-2 mt-3">
+                          {unitLessons.map((les) => {
+                            const lesExs = exercises.filter((ex) => ex.lesson_id === les.id);
+                            return (
+                              <div
+                                key={les.id}
+                                className="p-2.5 rounded-lg bg-white border border-slate-100 flex items-center justify-between text-xs"
+                              >
+                                <span className="font-semibold text-slate-800">{les.title}</span>
+                                <div className="flex items-center gap-1.5">
+                                  <Link
+                                    href={`/learn/session?lessonId=${les.id}`}
+                                    target="_blank"
+                                    className="px-2 py-1 rounded bg-emerald-50 text-emerald-700 font-bold hover:bg-emerald-100"
+                                  >
+                                    تشغيل ({lesExs.length})
+                                  </Link>
+                                  <button
+                                    onClick={() => {
+                                      setSelectedLessonId(les.id);
+                                      setActiveTab('add_exercise');
+                                    }}
+                                    className="p-1 rounded text-slate-400 hover:text-slate-800"
+                                    title="إضافة تمرين لهذا الدرس"
+                                  >
+                                    <PlusCircle className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
-                    ))}
-                  </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
           )}
 
-          {/* TAB 2: EXERCISES LIST */}
-          {activeTab === 'exercises' && (
-            <div className="space-y-5">
+          {/* TAB 2: UNITS (Active Clickable Management) */}
+          {activeTab === 'units' && (
+            <div className="space-y-6">
               <div className="flex items-center justify-between border-b pb-4">
                 <div>
-                  <h3 className="text-xl font-bold text-slate-900 font-arabic">إدارة التمارين الصوتية</h3>
-                  <p className="text-xs text-slate-500 mt-0.5">قائمة التمارين التفاعلية المرتبطة بالدروس</p>
+                  <h3 className="text-xl font-bold text-slate-900 font-arabic">إدارة وتصفح الوحدات الدراسية (Units)</h3>
+                  <p className="text-xs text-slate-500 mt-0.5">انقر على زر "عرض دروس الوحدة" لعرض وتعديل دروس كل وحدة</p>
                 </div>
-                <button
-                  onClick={() => setActiveTab('add_exercise')}
-                  className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-emerald-200 cursor-pointer"
-                >
-                  <PlusCircle className="w-4 h-4" />
-                  <span>+ إضافة تمرين جديد</span>
-                </button>
+              </div>
+
+              <div className="grid lg:grid-cols-3 gap-6">
+                {/* Form */}
+                <form onSubmit={handleCreateUnit} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+                  <h4 className="font-bold text-sm text-slate-800 border-b pb-2 flex items-center gap-2">
+                    <PlusCircle className="w-4 h-4 text-emerald-600" />
+                    <span>إضافة وحدة دراسية جديدة</span>
+                  </h4>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">المستوى التابع له *</label>
+                    <select
+                      value={unitLevelId}
+                      onChange={(e) => setUnitLevelId(e.target.value)}
+                      required
+                      className="w-full p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs"
+                    >
+                      {levels.map((l) => (
+                        <option key={l.id} value={l.id}>{l.title}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">عنوان الوحدة *</label>
+                    <input
+                      type="text"
+                      value={unitTitle}
+                      onChange={(e) => setUnitTitle(e.target.value)}
+                      required
+                      placeholder="e.g. الوحدة 4: الحياة اليومية"
+                      className="w-full p-2.5 rounded-xl border border-slate-200 text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">وصف الوحدة</label>
+                    <textarea
+                      rows={2}
+                      value={unitDesc}
+                      onChange={(e) => setUnitDesc(e.target.value)}
+                      className="w-full p-2.5 rounded-xl border border-slate-200 text-xs"
+                    />
+                  </div>
+                  <button type="submit" className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs cursor-pointer shadow-xs">
+                    حفظ الوحدة
+                  </button>
+                </form>
+
+                {/* List of Units */}
+                <div className="lg:col-span-2 space-y-4">
+                  <h4 className="font-bold text-sm text-slate-800 mb-2">الوحدات الحالية ({units.length})</h4>
+                  {units.map((u) => {
+                    const unitLessons = lessons.filter((les) => les.unit_id === u.id);
+                    return (
+                      <div key={u.id} className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-800 font-bold text-xs flex items-center justify-center">
+                              {u.order_index}
+                            </span>
+                            <h4 className="font-bold text-slate-900 text-sm font-arabic">{u.title}</h4>
+                          </div>
+                          <p className="text-xs text-slate-500 max-w-lg">{u.description || 'وحدة دراسية في منهج العربية بين يديك'}</p>
+                          <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full inline-block mt-2">
+                            تحتوي على {unitLessons.length} دروس مسجلة
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
+                          <button
+                            onClick={() => {
+                              setSelectedFilterUnitId(u.id);
+                              setActiveTab('lessons');
+                            }}
+                            className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-xs"
+                          >
+                            <span>عرض دروس الوحدة</span>
+                            <ArrowRight className="w-3.5 h-3.5 rotate-180" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: LESSONS (Active Clickable Management) */}
+          {activeTab === 'lessons' && (
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4">
+                <div>
+                  <h3 className="text-xl font-bold text-slate-900 font-arabic">إدارة الدروس التعليمية (Lessons)</h3>
+                  <p className="text-xs text-slate-500 mt-0.5">يمكنك تشغيل أي درس كتجربة طالب أو إضافة تمارين صوتية له</p>
+                </div>
+
+                {/* Filter by Unit */}
+                <div className="flex items-center gap-2">
+                  <Filter className="w-4 h-4 text-slate-400" />
+                  <span className="text-xs font-bold text-slate-600">تصفية حسب الوحدة:</span>
+                  <select
+                    value={selectedFilterUnitId}
+                    onChange={(e) => setSelectedFilterUnitId(e.target.value)}
+                    className="p-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-800"
+                  >
+                    <option value="all">كافة الوحدات ({lessons.length} درس)</option>
+                    {units.map((u) => (
+                      <option key={u.id} value={u.id}>{u.title}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid lg:grid-cols-3 gap-6">
+                {/* Form */}
+                <form onSubmit={handleCreateLesson} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+                  <h4 className="font-bold text-sm text-slate-800 border-b pb-2 flex items-center gap-2">
+                    <PlusCircle className="w-4 h-4 text-emerald-600" />
+                    <span>إضافة درس جديد</span>
+                  </h4>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">الوحدة التابع لها *</label>
+                    <select
+                      value={lessonUnitId}
+                      onChange={(e) => setLessonUnitId(e.target.value)}
+                      required
+                      className="w-full p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-medium"
+                    >
+                      {units.map((u) => (
+                        <option key={u.id} value={u.id}>{u.title}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">عنوان الدرس *</label>
+                    <input
+                      type="text"
+                      value={lessonTitle}
+                      onChange={(e) => setLessonTitle(e.target.value)}
+                      required
+                      placeholder="e.g. الدرس 2.3: حوار المسجد والأذان"
+                      className="w-full p-2.5 rounded-xl border border-slate-200 text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">نقاط المكافأة (XP)</label>
+                    <input
+                      type="number"
+                      value={lessonXp}
+                      onChange={(e) => setLessonXp(Number(e.target.value))}
+                      className="w-full p-2.5 rounded-xl border border-slate-200 text-xs"
+                    />
+                  </div>
+                  <button type="submit" className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs cursor-pointer shadow-xs">
+                    حفظ الدرس
+                  </button>
+                </form>
+
+                {/* List of Lessons */}
+                <div className="lg:col-span-2 space-y-3.5">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-bold text-sm text-slate-800">
+                      الدروس المعروضة ({filteredLessons.length})
+                    </h4>
+                    {selectedFilterUnitId !== 'all' && (
+                      <button
+                        onClick={() => setSelectedFilterUnitId('all')}
+                        className="text-xs text-emerald-600 font-bold hover:underline"
+                      >
+                        إلغاء التصفية
+                      </button>
+                    )}
+                  </div>
+
+                  {filteredLessons.map((les) => {
+                    const lesExs = exercises.filter((ex) => ex.lesson_id === les.id);
+                    const parentUnit = units.find((u) => u.id === les.unit_id);
+                    return (
+                      <div
+                        key={les.id}
+                        className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+                      >
+                        <div>
+                          <span className="text-[10px] font-bold text-slate-400 block mb-0.5">{parentUnit?.title}</span>
+                          <h4 className="font-bold text-slate-900 text-sm font-arabic">{les.title}</h4>
+                          <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded mt-1 inline-block">
+                            {lesExs.length} تمارين صوتية تفاعلية • +{les.xp_reward} XP
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
+                          {/* Play Lesson button */}
+                          <Link
+                            href={`/learn/session?lessonId=${les.id}`}
+                            target="_blank"
+                            className="px-3 py-2 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-bold text-xs flex items-center gap-1.5 transition-colors"
+                          >
+                            <Play className="w-3.5 h-3.5 fill-current" />
+                            <span>تشغيل الدرس</span>
+                          </Link>
+
+                          {/* Add exercise to this lesson */}
+                          <button
+                            onClick={() => {
+                              setSelectedLessonId(les.id);
+                              setActiveTab('add_exercise');
+                            }}
+                            className="px-3 py-2 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+                          >
+                            <PlusCircle className="w-3.5 h-3.5 text-emerald-600" />
+                            <span>+ تمرين</span>
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 4: EXERCISES */}
+          {activeTab === 'exercises' && (
+            <div className="space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4">
+                <div>
+                  <h3 className="text-xl font-bold text-slate-900 font-arabic">إدارة التمارين الصوتية</h3>
+                  <p className="text-xs text-slate-500 mt-0.5">استمع للتمارين أو قم بتشغيلها أو حذفها</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setActiveTab('add_exercise')}
+                    className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-emerald-200 cursor-pointer"
+                  >
+                    <PlusCircle className="w-4 h-4" />
+                    <span>+ إضافة تمرين جديد</span>
+                  </button>
+                </div>
               </div>
 
               <div className="grid gap-3.5">
-                {exercises.map((ex) => (
+                {filteredExercises.map((ex) => (
                   <div
                     key={ex.id}
                     className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
@@ -798,7 +1037,7 @@ export default function AdminLTEPage() {
                           النص: <span className="font-arabic font-bold text-slate-800">{ex.arabic_text}</span> | النطق: {ex.transliteration || '-'}
                         </p>
                         <span className="text-[11px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded mt-1 inline-block break-all max-w-lg truncate">
-                          {ex.audio_url || 'صوت تلقائي (Speech)'}
+                          {ex.audio_url || 'صوت تلقائي'}
                         </span>
                       </div>
                     </div>
@@ -806,7 +1045,7 @@ export default function AdminLTEPage() {
                     <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
                       <button
                         onClick={() => testAudio(ex.audio_url || '', ex.arabic_text || '')}
-                        className="p-2 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors cursor-pointer"
+                        className="p-2.5 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors cursor-pointer"
                         title="استمع للصوت"
                       >
                         <Volume2 className="w-4 h-4" />
@@ -814,7 +1053,7 @@ export default function AdminLTEPage() {
 
                       <button
                         onClick={() => handleDeleteExercise(ex.id)}
-                        className="p-2 rounded-xl bg-slate-100 text-slate-500 hover:bg-rose-100 hover:text-rose-700 transition-colors cursor-pointer"
+                        className="p-2.5 rounded-xl bg-slate-100 text-slate-500 hover:bg-rose-100 hover:text-rose-700 transition-colors cursor-pointer"
                         title="حذف التمرين"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -826,10 +1065,9 @@ export default function AdminLTEPage() {
             </div>
           )}
 
-          {/* TAB 3: ADD EXERCISE (With EveryAyah and Letter presets & Live Simulator) */}
+          {/* TAB 5: ADD EXERCISE */}
           {activeTab === 'add_exercise' && (
             <div className="grid lg:grid-cols-2 gap-8">
-              {/* Exercise Form */}
               <form
                 onSubmit={handleCreateExercise}
                 className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-5"
@@ -866,12 +1104,12 @@ export default function AdminLTEPage() {
                   </select>
                 </div>
 
-                {/* Audio Engine Box */}
+                {/* Audio selector */}
                 <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
                       <Radio className="w-3.5 h-3.5 text-emerald-600" />
-                      <span>مصدر الصوت القرآني (Audio Engine)</span>
+                      <span>مصدر الصوت التفاعلي (Audio Engine)</span>
                     </span>
 
                     <button
@@ -887,18 +1125,6 @@ export default function AdminLTEPage() {
                   <div className="grid grid-cols-3 gap-2">
                     <button
                       type="button"
-                      onClick={() => setAudioSourceMode('quran_ayah')}
-                      className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                        audioSourceMode === 'quran_ayah'
-                          ? 'bg-emerald-600 text-white shadow-xs'
-                          : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
-                      }`}
-                    >
-                      آية قرآنية (EveryAyah)
-                    </button>
-
-                    <button
-                      type="button"
                       onClick={() => {
                         setAudioSourceMode('letter_preset');
                         setQAudioUrl(BUILT_IN_LETTER_PRESETS[0].url);
@@ -909,7 +1135,19 @@ export default function AdminLTEPage() {
                           : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
                       }`}
                     >
-                      حروف هجائية
+                      حوارات وحروف
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setAudioSourceMode('quran_ayah')}
+                      className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                        audioSourceMode === 'quran_ayah'
+                          ? 'bg-emerald-600 text-white shadow-xs'
+                          : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
+                      }`}
+                    >
+                      آية قرآنية
                     </button>
 
                     <button
@@ -921,9 +1159,23 @@ export default function AdminLTEPage() {
                           : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
                       }`}
                     >
-                      رابط مباشر
+                      رابط مخصص
                     </button>
                   </div>
+
+                  {audioSourceMode === 'letter_preset' && (
+                    <div className="pt-2">
+                      <select
+                        value={qAudioUrl}
+                        onChange={(e) => setQAudioUrl(e.target.value)}
+                        className="w-full p-2.5 rounded-xl border border-slate-200 bg-white text-xs font-medium"
+                      >
+                        {BUILT_IN_LETTER_PRESETS.map((p) => (
+                          <option key={p.url} value={p.url}>{p.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
 
                   {audioSourceMode === 'quran_ayah' && (
                     <div className="space-y-3 pt-2">
@@ -935,9 +1187,7 @@ export default function AdminLTEPage() {
                           className="w-full p-2.5 rounded-xl border border-slate-200 bg-white text-xs font-medium"
                         >
                           {QURAN_RECITERS.map((r) => (
-                            <option key={r.folder} value={r.folder}>
-                              {r.nameAr}
-                            </option>
+                            <option key={r.folder} value={r.folder}>{r.nameAr}</option>
                           ))}
                         </select>
                       </div>
@@ -955,9 +1205,7 @@ export default function AdminLTEPage() {
                             className="w-full p-2.5 rounded-xl border border-slate-200 bg-white text-xs font-medium"
                           >
                             {COMMON_SURAHS.map((s) => (
-                              <option key={s.number} value={s.number}>
-                                سورة {s.nameAr} ({s.versesCount} آيات)
-                              </option>
+                              <option key={s.number} value={s.number}>سورة {s.nameAr}</option>
                             ))}
                           </select>
                         </div>
@@ -974,26 +1222,6 @@ export default function AdminLTEPage() {
                           />
                         </div>
                       </div>
-
-                      <div className="text-[11px] text-emerald-800 bg-emerald-50 p-2.5 rounded-xl border border-emerald-200 font-mono break-all">
-                        {qAudioUrl}
-                      </div>
-                    </div>
-                  )}
-
-                  {audioSourceMode === 'letter_preset' && (
-                    <div className="pt-2">
-                      <select
-                        value={qAudioUrl}
-                        onChange={(e) => setQAudioUrl(e.target.value)}
-                        className="w-full p-2.5 rounded-xl border border-slate-200 bg-white text-xs font-medium"
-                      >
-                        {BUILT_IN_LETTER_PRESETS.map((p) => (
-                          <option key={p.url} value={p.url}>
-                            {p.label}
-                          </option>
-                        ))}
-                      </select>
                     </div>
                   )}
 
@@ -1011,9 +1239,7 @@ export default function AdminLTEPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                    نص السؤال *
-                  </label>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">نص السؤال *</label>
                   <input
                     type="text"
                     value={qText}
@@ -1025,9 +1251,7 @@ export default function AdminLTEPage() {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                      الآية أو الحرف المستهدف *
-                    </label>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">العبارة المستهدفة *</label>
                     <input
                       type="text"
                       dir="rtl"
@@ -1037,11 +1261,8 @@ export default function AdminLTEPage() {
                       className="w-full p-3 rounded-xl border border-slate-200 text-base font-arabic text-center focus:ring-2 focus:ring-emerald-500"
                     />
                   </div>
-
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                      النطق الصوتي
-                    </label>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">النطق الصوتي</label>
                     <input
                       type="text"
                       value={qTranslit}
@@ -1053,77 +1274,61 @@ export default function AdminLTEPage() {
 
                 {/* 4 Options */}
                 <div className="space-y-3 pt-2">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                    الخيارات الأربعة (حدد الإجابة الصحيحة):
-                  </label>
-
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">الخيارات الأربعة:</label>
                   <div className="grid grid-cols-2 gap-3">
                     <div className={`p-3 rounded-xl border-2 ${correctOpt === 'opt1' ? 'border-emerald-500 bg-emerald-50/50' : 'border-slate-200'}`}>
-                      <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center justify-between mb-1">
                         <span className="text-xs font-bold text-slate-500">الخيار 1</span>
                         <input type="radio" name="correct" checked={correctOpt === 'opt1'} onChange={() => setCorrectOpt('opt1')} />
                       </div>
-                      <input type="text" dir="rtl" value={opt1.text} onChange={(e) => setOpt1({ ...opt1, text: e.target.value })} className="w-full p-2 text-center text-sm font-arabic border rounded-lg bg-white" />
-                      <input type="text" value={opt1.translit} onChange={(e) => setOpt1({ ...opt1, translit: e.target.value })} placeholder="Translit" className="w-full p-1 text-center text-[11px] text-slate-500 mt-1 border rounded" />
+                      <input type="text" dir="rtl" value={opt1.text} onChange={(e) => setOpt1({ ...opt1, text: e.target.value })} className="w-full p-1.5 text-center text-sm font-arabic border rounded-lg bg-white" />
+                      <input type="text" value={opt1.translit} onChange={(e) => setOpt1({ ...opt1, translit: e.target.value })} placeholder="Translit" className="w-full p-1 text-center text-[10px] text-slate-500 mt-1 border rounded" />
                     </div>
 
                     <div className={`p-3 rounded-xl border-2 ${correctOpt === 'opt2' ? 'border-emerald-500 bg-emerald-50/50' : 'border-slate-200'}`}>
-                      <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center justify-between mb-1">
                         <span className="text-xs font-bold text-slate-500">الخيار 2</span>
                         <input type="radio" name="correct" checked={correctOpt === 'opt2'} onChange={() => setCorrectOpt('opt2')} />
                       </div>
-                      <input type="text" dir="rtl" value={opt2.text} onChange={(e) => setOpt2({ ...opt2, text: e.target.value })} className="w-full p-2 text-center text-sm font-arabic border rounded-lg bg-white" />
-                      <input type="text" value={opt2.translit} onChange={(e) => setOpt2({ ...opt2, translit: e.target.value })} placeholder="Translit" className="w-full p-1 text-center text-[11px] text-slate-500 mt-1 border rounded" />
+                      <input type="text" dir="rtl" value={opt2.text} onChange={(e) => setOpt2({ ...opt2, text: e.target.value })} className="w-full p-1.5 text-center text-sm font-arabic border rounded-lg bg-white" />
+                      <input type="text" value={opt2.translit} onChange={(e) => setOpt2({ ...opt2, translit: e.target.value })} placeholder="Translit" className="w-full p-1 text-center text-[10px] text-slate-500 mt-1 border rounded" />
                     </div>
 
                     <div className={`p-3 rounded-xl border-2 ${correctOpt === 'opt3' ? 'border-emerald-500 bg-emerald-50/50' : 'border-slate-200'}`}>
-                      <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center justify-between mb-1">
                         <span className="text-xs font-bold text-slate-500">الخيار 3</span>
                         <input type="radio" name="correct" checked={correctOpt === 'opt3'} onChange={() => setCorrectOpt('opt3')} />
                       </div>
-                      <input type="text" dir="rtl" value={opt3.text} onChange={(e) => setOpt3({ ...opt3, text: e.target.value })} className="w-full p-2 text-center text-sm font-arabic border rounded-lg bg-white" />
-                      <input type="text" value={opt3.translit} onChange={(e) => setOpt3({ ...opt3, translit: e.target.value })} placeholder="Translit" className="w-full p-1 text-center text-[11px] text-slate-500 mt-1 border rounded" />
+                      <input type="text" dir="rtl" value={opt3.text} onChange={(e) => setOpt3({ ...opt3, text: e.target.value })} className="w-full p-1.5 text-center text-sm font-arabic border rounded-lg bg-white" />
+                      <input type="text" value={opt3.translit} onChange={(e) => setOpt3({ ...opt3, translit: e.target.value })} placeholder="Translit" className="w-full p-1 text-center text-[10px] text-slate-500 mt-1 border rounded" />
                     </div>
 
                     <div className={`p-3 rounded-xl border-2 ${correctOpt === 'opt4' ? 'border-emerald-500 bg-emerald-50/50' : 'border-slate-200'}`}>
-                      <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center justify-between mb-1">
                         <span className="text-xs font-bold text-slate-500">الخيار 4</span>
                         <input type="radio" name="correct" checked={correctOpt === 'opt4'} onChange={() => setCorrectOpt('opt4')} />
                       </div>
-                      <input type="text" dir="rtl" value={opt4.text} onChange={(e) => setOpt4({ ...opt4, text: e.target.value })} className="w-full p-2 text-center text-sm font-arabic border rounded-lg bg-white" />
-                      <input type="text" value={opt4.translit} onChange={(e) => setOpt4({ ...opt4, translit: e.target.value })} placeholder="Translit" className="w-full p-1 text-center text-[11px] text-slate-500 mt-1 border rounded" />
+                      <input type="text" dir="rtl" value={opt4.text} onChange={(e) => setOpt4({ ...opt4, text: e.target.value })} className="w-full p-1.5 text-center text-sm font-arabic border rounded-lg bg-white" />
+                      <input type="text" value={opt4.translit} onChange={(e) => setOpt4({ ...opt4, translit: e.target.value })} placeholder="Translit" className="w-full p-1 text-center text-[10px] text-slate-500 mt-1 border rounded" />
                     </div>
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                    الشرح التعليمي
-                  </label>
-                  <textarea
-                    rows={2}
-                    value={qExplanation}
-                    onChange={(e) => setQExplanation(e.target.value)}
-                    className="w-full p-3 rounded-xl border border-slate-200 text-sm"
-                  />
-                </div>
-
                 <button
                   type="submit"
-                  className="w-full py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm shadow-md shadow-emerald-200 transition-all cursor-pointer"
+                  className="w-full py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm shadow-md shadow-emerald-200 transition-all cursor-pointer"
                 >
                   حفظ التمرين في قاعدة البيانات
                 </button>
               </form>
 
-              {/* Live Simulator */}
+              {/* Simulator */}
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
                     <Eye className="w-5 h-5 text-emerald-600" />
-                    <span>المعاينة التفاعلية الفورية (Live Simulator)</span>
+                    <span>المعاينة التفاعلية المباشرة (Live Simulator)</span>
                   </h3>
-                  <span className="text-xs text-slate-500">محاكاة تجربة الطالب</span>
                 </div>
 
                 <InteractiveAudioExercisePlayer
@@ -1152,162 +1357,11 @@ export default function AdminLTEPage() {
             </div>
           )}
 
-          {/* TAB 4: LESSONS MANAGER */}
-          {activeTab === 'lessons' && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between border-b pb-4">
-                <div>
-                  <h3 className="text-xl font-bold text-slate-900 font-arabic">إدارة الدروس التعليمية</h3>
-                  <p className="text-xs text-slate-500 mt-0.5">الدروس المرتبطة بكل وحدة في المنهج</p>
-                </div>
-              </div>
-
-              <div className="grid lg:grid-cols-3 gap-6">
-                {/* Add Lesson Form */}
-                <form onSubmit={handleCreateLesson} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
-                  <h4 className="font-bold text-sm text-slate-800 flex items-center gap-2 border-b pb-2">
-                    <PlusCircle className="w-4 h-4 text-emerald-600" />
-                    <span>إضافة درس جديد</span>
-                  </h4>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">الوحدة التابع لها *</label>
-                    <select
-                      value={lessonUnitId}
-                      onChange={(e) => setLessonUnitId(e.target.value)}
-                      required
-                      className="w-full p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs"
-                    >
-                      {units.map((u) => (
-                        <option key={u.id} value={u.id}>{u.title}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">عنوان الدرس *</label>
-                    <input
-                      type="text"
-                      value={lessonTitle}
-                      onChange={(e) => setLessonTitle(e.target.value)}
-                      required
-                      className="w-full p-2.5 rounded-xl border border-slate-200 text-xs"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">نوع الدرس</label>
-                    <select
-                      value={lessonType}
-                      onChange={(e) => setLessonType(e.target.value)}
-                      className="w-full p-2.5 rounded-xl border border-slate-200 text-xs"
-                    >
-                      <option value="vocab">مفردات قرآنية (Quranic Verses)</option>
-                      <option value="alphabet">حروف هجائية (Alphabet)</option>
-                      <option value="harakat">حركات ومدود (Harakat)</option>
-                      <option value="prayer">أذكار وصلوات (Adhkar)</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">نقاط XP</label>
-                    <input
-                      type="number"
-                      value={lessonXp}
-                      onChange={(e) => setLessonXp(Number(e.target.value))}
-                      className="w-full p-2.5 rounded-xl border border-slate-200 text-xs"
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs cursor-pointer shadow-xs"
-                  >
-                    حفظ الدرس
-                  </button>
-                </form>
-
-                {/* Lessons Table */}
-                <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-5 shadow-xs">
-                  <h4 className="font-bold text-sm text-slate-800 mb-4">قائمة الدروس الحالية ({lessons.length})</h4>
-                  <div className="divide-y divide-slate-100">
-                    {lessons.map((les) => (
-                      <div key={les.id} className="py-3 flex items-center justify-between">
-                        <div>
-                          <h5 className="text-xs font-bold text-slate-800">{les.title}</h5>
-                          <span className="text-[11px] text-slate-400 font-mono">النوع: {les.lesson_type} | +{les.xp_reward} XP</span>
-                        </div>
-                        <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700">
-                          نشط
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 5: UNITS MANAGER */}
-          {activeTab === 'units' && (
-            <div className="space-y-6">
-              <div className="border-b pb-4">
-                <h3 className="text-xl font-bold text-slate-900 font-arabic">إدارة الوحدات الدراسية (Units)</h3>
-              </div>
-
-              <div className="grid lg:grid-cols-3 gap-6">
-                <form onSubmit={handleCreateUnit} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
-                  <h4 className="font-bold text-sm text-slate-800 border-b pb-2">إضافة وحدة جديدة</h4>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">المستوى التابع له *</label>
-                    <select
-                      value={unitLevelId}
-                      onChange={(e) => setUnitLevelId(e.target.value)}
-                      required
-                      className="w-full p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs"
-                    >
-                      {levels.map((l) => (
-                        <option key={l.id} value={l.id}>{l.title}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">عنوان الوحدة *</label>
-                    <input
-                      type="text"
-                      value={unitTitle}
-                      onChange={(e) => setUnitTitle(e.target.value)}
-                      required
-                      className="w-full p-2.5 rounded-xl border border-slate-200 text-xs"
-                    />
-                  </div>
-                  <button type="submit" className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs cursor-pointer">
-                    حفظ الوحدة
-                  </button>
-                </form>
-
-                <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-5 shadow-xs">
-                  <h4 className="font-bold text-sm text-slate-800 mb-4">الوحدات المسجلة ({units.length})</h4>
-                  <div className="divide-y divide-slate-100">
-                    {units.map((u) => (
-                      <div key={u.id} className="py-3 flex items-center justify-between">
-                        <div>
-                          <h5 className="text-xs font-bold text-slate-800">{u.title}</h5>
-                          <span className="text-[11px] text-slate-400">{u.description || 'بدون وصف إضافي'}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 6: LEVELS MANAGER */}
+          {/* TAB 6: LEVELS */}
           {activeTab === 'levels' && (
             <div className="space-y-6">
               <div className="border-b pb-4">
-                <h3 className="text-xl font-bold text-slate-900 font-arabic">إدارة المستويات المنهجية (Levels)</h3>
+                <h3 className="text-xl font-bold text-slate-900 font-arabic">إدارة المستويات (Levels)</h3>
               </div>
 
               <div className="grid lg:grid-cols-3 gap-6">
@@ -1320,16 +1374,18 @@ export default function AdminLTEPage() {
                       value={levelTitle}
                       onChange={(e) => setLevelTitle(e.target.value)}
                       required
+                      placeholder="e.g. الكتاب الثاني - الجزء الأول"
                       className="w-full p-2.5 rounded-xl border border-slate-200 text-xs"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">المعرف الفريد (Slug) *</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">المعرف (Slug) *</label>
                     <input
                       type="text"
                       value={levelSlug}
                       onChange={(e) => setLevelSlug(e.target.value)}
                       required
+                      placeholder="bayna-yadayk-3"
                       className="w-full p-2.5 rounded-xl border border-slate-200 text-xs font-mono"
                     />
                   </div>
@@ -1369,12 +1425,11 @@ export default function AdminLTEPage() {
             </div>
           )}
 
-          {/* TAB 7: USERS & LEARNERS */}
+          {/* TAB 7: USERS */}
           {activeTab === 'users' && (
             <div className="space-y-5">
               <div className="border-b pb-4">
-                <h3 className="text-xl font-bold text-slate-900 font-arabic">سجل الطلاب والمستخدمين (Profiles)</h3>
-                <p className="text-xs text-slate-500 mt-0.5">المستخدمين المسجلين في قاعدة بيانات Supabase Auth</p>
+                <h3 className="text-xl font-bold text-slate-900 font-arabic">سجل الطلاب والمستخدمين ({profiles.length})</h3>
               </div>
 
               <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs">
@@ -1406,9 +1461,7 @@ export default function AdminLTEPage() {
                           <Flame className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
                           <span>{p.streak} يوم</span>
                         </td>
-                        <td className="p-3.5 font-bold text-emerald-600">
-                          {p.total_xp} XP
-                        </td>
+                        <td className="p-3.5 font-bold text-emerald-600">{p.total_xp} XP</td>
                         <td className="p-3.5">
                           <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-800">
                             {p.subscription_tier}
@@ -1429,20 +1482,19 @@ export default function AdminLTEPage() {
 
               <div className="space-y-3">
                 <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
-                  <span className="text-xs font-bold text-slate-700 block mb-1">سيرفر EveryAyah الافتراضي للقرآن:</span>
-                  <span className="text-xs font-mono text-emerald-700 block">https://everyayah.com/data/</span>
-                  <p className="text-[11px] text-slate-500 mt-1">توليد مسارات الصوت وفق معيار SSSAAA.mp3 لكافة السور والآيات.</p>
+                  <span className="text-xs font-bold text-slate-700 block mb-1">منهج المنصة النشط:</span>
+                  <span className="text-xs font-bold text-emerald-700 block">سلسلة العربية بين يديك - الكتاب الأول</span>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
-                  <span className="text-xs font-bold text-slate-700 block mb-1">مشروع Supabase المتصل:</span>
+                  <span className="text-xs font-bold text-slate-700 block mb-1">مشروع Supabase:</span>
                   <span className="text-xs font-mono text-slate-800 block">quranic-arabic (sfojwjlbhbhxppfxgxxb)</span>
-                  <span className="text-[11px] text-emerald-600 font-bold block mt-1">✓ متصل بنجاح مع RLS نشط</span>
+                  <span className="text-[11px] text-emerald-600 font-bold block mt-1">✓ RLS نشط وغير متداخل</span>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
-                  <span className="text-xs font-bold text-slate-700 block mb-1">بيانات دخول المسؤول الحالي:</span>
-                  <span className="text-xs font-mono text-slate-800 block">admin@bayan.com (Super Admin)</span>
+                  <span className="text-xs font-bold text-slate-700 block mb-1">بيانات دخول المشرف المعتمدة:</span>
+                  <span className="text-xs font-mono text-slate-800 block">admin@bayan.com</span>
                 </div>
               </div>
             </div>
