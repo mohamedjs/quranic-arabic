@@ -5,10 +5,11 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 export interface UseAudioPlayerOptions {
   initialSpeed?: number;
   autoPlay?: boolean;
+  arabicFallbackText?: string;
 }
 
 export function useAudioPlayer(src: string | null, options: UseAudioPlayerOptions = {}) {
-  const { initialSpeed = 1.0, autoPlay = false } = options;
+  const { initialSpeed = 1.0, autoPlay = false, arabicFallbackText = '' } = options;
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [playbackSpeed, setPlaybackSpeed] = useState<number>(initialSpeed);
@@ -17,7 +18,47 @@ export function useAudioPlayer(src: string | null, options: UseAudioPlayerOption
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Initialize or update audio instance
+  // Playback via native SpeechSynthesis fallback
+  const speakWithSpeechSynthesis = useCallback((text: string, rate: number) => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+      setError('Audio playback is not supported on this device.');
+      setIsPlaying(false);
+      return;
+    }
+
+    try {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'ar-SA';
+      utterance.rate = rate === 0.75 ? 0.75 : 1.0;
+
+      // Pick Arabic voice if available
+      const voices = window.speechSynthesis.getVoices();
+      const arVoice = voices.find((v) => v.lang.startsWith('ar'));
+      if (arVoice) {
+        utterance.voice = arVoice;
+      }
+
+      utterance.onstart = () => {
+        setIsPlaying(true);
+        setError(null);
+      };
+      utterance.onend = () => {
+        setIsPlaying(false);
+      };
+      utterance.onerror = (e) => {
+        console.warn('SpeechSynthesis error:', e);
+        setIsPlaying(false);
+      };
+
+      window.speechSynthesis.speak(utterance);
+    } catch (e) {
+      console.error('SpeechSynthesis failed:', e);
+      setIsPlaying(false);
+    }
+  }, []);
+
+  // Initialize audio element
   useEffect(() => {
     if (!src) {
       if (audioRef.current) {
@@ -29,12 +70,14 @@ export function useAudioPlayer(src: string | null, options: UseAudioPlayerOption
       return;
     }
 
-    const audio = new Audio(src);
+    const audio = new Audio();
+    audio.src = src;
     audioRef.current = audio;
     audio.playbackRate = playbackSpeed;
+    audio.preload = 'auto';
 
     const handleLoadedMetadata = () => {
-      setDuration(audio.duration);
+      setDuration(audio.duration || 0);
       setIsLoaded(true);
       setError(null);
       if (autoPlay) {
@@ -52,9 +95,10 @@ export function useAudioPlayer(src: string | null, options: UseAudioPlayerOption
     };
 
     const handleError = () => {
-      setError('Unable to load recitation audio.');
-      setIsPlaying(false);
+      // If audio file fails (404, CORS, network), don't break; prepare to fallback
       setIsLoaded(false);
+      setIsPlaying(false);
+      console.warn(`Failed to load audio: ${src}. Will use speech synthesis fallback if triggered.`);
     };
 
     audio.addEventListener('loadedmetadata', handleLoadedMetadata);
@@ -69,27 +113,47 @@ export function useAudioPlayer(src: string | null, options: UseAudioPlayerOption
       audio.removeEventListener('ended', handleEnded);
       audio.removeEventListener('error', handleError);
     };
-  }, [src, autoPlay]);
+  }, [src, autoPlay, playbackSpeed]);
 
   const play = useCallback(() => {
-    if (audioRef.current) {
+    // 1. If audio element is available and valid
+    if (audioRef.current && audioRef.current.src && !audioRef.current.error) {
       audioRef.current.currentTime = 0;
       audioRef.current.playbackRate = playbackSpeed;
-      audioRef.current
-        .play()
-        .then(() => setIsPlaying(true))
-        .catch((e) => {
-          console.warn('Playback error:', e);
-          setIsPlaying(false);
-        });
+
+      const playPromise = audioRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            setIsPlaying(true);
+            setError(null);
+          })
+          .catch((err) => {
+            console.warn('Audio play failed, falling back to speech synthesis:', err);
+            if (arabicFallbackText) {
+              speakWithSpeechSynthesis(arabicFallbackText, playbackSpeed);
+            } else {
+              setIsPlaying(false);
+            }
+          });
+        return;
+      }
     }
-  }, [playbackSpeed]);
+
+    // 2. Fallback to Web Speech API directly
+    if (arabicFallbackText) {
+      speakWithSpeechSynthesis(arabicFallbackText, playbackSpeed);
+    }
+  }, [playbackSpeed, arabicFallbackText, speakWithSpeechSynthesis]);
 
   const pause = useCallback(() => {
     if (audioRef.current) {
       audioRef.current.pause();
-      setIsPlaying(false);
     }
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+    setIsPlaying(false);
   }, []);
 
   const togglePlay = useCallback(() => {

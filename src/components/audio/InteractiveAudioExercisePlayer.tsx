@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Volume2, VolumeX, RotateCcw, CheckCircle2, XCircle, ArrowRight, Gauge, Sparkles } from 'lucide-react';
+import { Volume2, RotateCcw, CheckCircle2, XCircle, ArrowRight, Gauge, Sparkles } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useAudioPlayer } from '@/hooks/useAudioPlayer';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
@@ -18,15 +18,23 @@ export const InteractiveAudioExercisePlayer: React.FC<InteractiveAudioExercisePl
   exercise,
   onComplete,
   onNext,
-  autoPlayAudio = true,
+  autoPlayAudio = false,
 }) => {
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
   const [status, setStatus] = useState<'unanswered' | 'correct' | 'incorrect'>('unanswered');
   const [speed, setSpeed] = useState<number>(1.0);
 
+  // Fallback text is either the question's target letter or correct option's arabic text
+  const correctOption = exercise.options_json?.find((o) => o.id === exercise.correct_answer);
+  const fallbackArabicText = exercise.arabic_text || correctOption?.text || '';
+
   const { isPlaying, play, togglePlay, changeSpeed, error: audioError } = useAudioPlayer(
     exercise.audio_url,
-    { initialSpeed: speed, autoPlay: autoPlayAudio }
+    {
+      initialSpeed: speed,
+      autoPlay: autoPlayAudio,
+      arabicFallbackText: fallbackArabicText,
+    }
   );
 
   const { playSuccess, playError, playClick } = useSoundEffects();
@@ -40,10 +48,23 @@ export const InteractiveAudioExercisePlayer: React.FC<InteractiveAudioExercisePl
   };
 
   // Option select handler
-  const handleSelectOption = (optionId: string) => {
+  const handleSelectOption = (option: ExerciseOption) => {
     if (status !== 'unanswered') return;
     playClick();
-    setSelectedOptionId(optionId);
+    setSelectedOptionId(option.id);
+
+    // Also pronounce the selected letter so user hears their choice
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window && option.text) {
+      try {
+        window.speechSynthesis.cancel();
+        const utt = new SpeechSynthesisUtterance(option.text);
+        utt.lang = 'ar-SA';
+        utt.rate = speed;
+        window.speechSynthesis.speak(utt);
+      } catch (e) {
+        // ignore
+      }
+    }
   };
 
   // Verification
@@ -63,7 +84,7 @@ export const InteractiveAudioExercisePlayer: React.FC<InteractiveAudioExercisePl
           colors: ['#10b981', '#34d399', '#f59e0b', '#60a5fa'],
         });
       } catch (e) {
-        // non-critical
+        // ignore
       }
       onComplete?.(true, 100);
     } else {
@@ -76,7 +97,6 @@ export const InteractiveAudioExercisePlayer: React.FC<InteractiveAudioExercisePl
   // Keyboard Shortcuts (1-4 for options, Space/R for audio, Enter to check/advance)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't trigger if user is typing in an input
       if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
 
       if (e.code === 'Space' || e.key.toLowerCase() === 'r') {
@@ -88,7 +108,7 @@ export const InteractiveAudioExercisePlayer: React.FC<InteractiveAudioExercisePl
       } else if (['1', '2', '3', '4'].includes(e.key) && status === 'unanswered') {
         const index = parseInt(e.key, 10) - 1;
         if (exercise.options_json && exercise.options_json[index]) {
-          handleSelectOption(exercise.options_json[index].id);
+          handleSelectOption(exercise.options_json[index]);
         }
       } else if (e.key === 'Enter') {
         e.preventDefault();
@@ -111,20 +131,20 @@ export const InteractiveAudioExercisePlayer: React.FC<InteractiveAudioExercisePl
         <div className="flex items-center justify-between mb-3">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-emerald-100 text-emerald-800">
             <Sparkles className="w-3.5 h-3.5" />
-            Phonetic Recognition
+            Phonetic Recognition (تمييز الأصوات)
           </span>
 
           {/* Audio Speed Switcher (0.75x / 1.0x) */}
           <button
             type="button"
             onClick={handleToggleSpeed}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border border-slate-200 bg-white hover:bg-slate-50 transition-colors shadow-sm text-slate-700"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border border-slate-200 bg-white hover:bg-slate-50 transition-colors shadow-sm text-slate-700 cursor-pointer"
             title="Toggle Recitation Speed (Key: S)"
           >
             <Gauge className="w-3.5 h-3.5 text-slate-500" />
             <span>Speed:</span>
             <span className={`font-bold ${speed === 0.75 ? 'text-amber-600' : 'text-emerald-600'}`}>
-              {speed === 0.75 ? '0.75x (Slow)' : '1.0x (Normal)'}
+              {speed === 0.75 ? '0.75x (بطيء)' : '1.0x (عادي)'}
             </span>
           </button>
         </div>
@@ -142,24 +162,22 @@ export const InteractiveAudioExercisePlayer: React.FC<InteractiveAudioExercisePl
       {/* Central Audio Playback Stage */}
       <div className="py-10 px-6 flex flex-col items-center justify-center bg-radial from-emerald-50/50 to-transparent">
         <div className="relative group">
-          {/* Animated pulsing wave aura when playing */}
           {isPlaying && (
-            <div className="absolute -inset-3 rounded-full bg-emerald-400/25 animate-ping" />
+            <div className="absolute -inset-4 rounded-full bg-emerald-400/30 animate-ping" />
           )}
 
           <button
             type="button"
-            onClick={togglePlay}
-            disabled={!exercise.audio_url}
-            className={`relative w-24 h-24 rounded-full flex items-center justify-center shadow-lg transition-transform transform active:scale-95 focus:outline-none focus:ring-4 focus:ring-emerald-300 ${
+            onClick={play}
+            className={`relative w-24 h-24 rounded-full flex items-center justify-center shadow-lg transition-transform transform active:scale-95 focus:outline-none focus:ring-4 focus:ring-emerald-300 cursor-pointer ${
               isPlaying
-                ? 'bg-emerald-600 text-white shadow-emerald-200'
+                ? 'bg-emerald-600 text-white shadow-emerald-200 ring-4 ring-emerald-400'
                 : 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-emerald-100 hover:scale-105'
             }`}
             aria-label="Play Recitation Audio"
           >
             {isPlaying ? (
-              <RotateCcw className="w-10 h-10 animate-spin" style={{ animationDuration: '3s' }} />
+              <RotateCcw className="w-10 h-10 animate-spin" style={{ animationDuration: '2s' }} />
             ) : (
               <Volume2 className="w-10 h-10" />
             )}
@@ -167,18 +185,17 @@ export const InteractiveAudioExercisePlayer: React.FC<InteractiveAudioExercisePl
         </div>
 
         <p className="text-xs text-slate-500 mt-4 flex items-center gap-1.5 font-medium">
-          <span>Press</span>
+          <span>اضغط</span>
           <kbd className="px-2 py-0.5 rounded bg-slate-100 border border-slate-300 text-[11px] font-mono text-slate-600 shadow-xs">
             Space
           </kbd>
-          <span>or click to replay</span>
+          <span>أو انقر على الزر لسماع الصوت</span>
         </p>
 
-        {audioError && (
-          <div className="mt-2 text-xs text-rose-500 flex items-center gap-1">
-            <VolumeX className="w-3.5 h-3.5" />
-            <span>{audioError}</span>
-          </div>
+        {isPlaying && (
+          <span className="mt-2 text-xs font-semibold text-emerald-600 animate-pulse">
+            جاري تشغيل الصوت...
+          </span>
         )}
       </div>
 
@@ -209,7 +226,7 @@ export const InteractiveAudioExercisePlayer: React.FC<InteractiveAudioExercisePl
               <button
                 key={option.id}
                 type="button"
-                onClick={() => handleSelectOption(option.id)}
+                onClick={() => handleSelectOption(option)}
                 disabled={status !== 'unanswered'}
                 className={`relative group p-5 md:p-6 rounded-2xl border-2 transition-all duration-200 flex flex-col items-center justify-center text-center cursor-pointer select-none ${cardStyles}`}
               >
@@ -255,9 +272,9 @@ export const InteractiveAudioExercisePlayer: React.FC<InteractiveAudioExercisePl
               <div className="flex items-start gap-3">
                 <CheckCircle2 className="w-8 h-8 text-emerald-600 shrink-0 mt-0.5" />
                 <div>
-                  <h4 className="font-bold text-emerald-900 text-base">Mumtaz! Excellent! (ممتاز)</h4>
+                  <h4 className="font-bold text-emerald-900 text-base">Mumtaz! Excellent! (ممتاز 🎉)</h4>
                   <p className="text-xs md:text-sm text-emerald-800 mt-0.5">
-                    {exercise.explanation || 'You accurately matched the Arabic sound!'}
+                    {exercise.explanation || 'أحسنت! إجابة صحيحة ومطابقة للصوت بدقة.'}
                   </p>
                 </div>
               </div>
@@ -267,9 +284,9 @@ export const InteractiveAudioExercisePlayer: React.FC<InteractiveAudioExercisePl
               <div className="flex items-start gap-3">
                 <XCircle className="w-8 h-8 text-rose-600 shrink-0 mt-0.5" />
                 <div>
-                  <h4 className="font-bold text-rose-900 text-base">Not quite right (حاول مرة أخرى)</h4>
+                  <h4 className="font-bold text-rose-900 text-base">Not quite right (حاول مرة أخرى ⚠️)</h4>
                   <p className="text-xs md:text-sm text-rose-800 mt-0.5">
-                    {exercise.explanation || 'Listen closely to the dot placement and mouth articulation.'}
+                    {exercise.explanation || 'استمع جيداً لمخرج الحرف وعدد النقاط وموضعها.'}
                   </p>
                 </div>
               </div>
@@ -277,7 +294,7 @@ export const InteractiveAudioExercisePlayer: React.FC<InteractiveAudioExercisePl
 
             {status === 'unanswered' && (
               <p className="text-xs text-slate-500 italic hidden md:block">
-                Select your answer and press <kbd className="px-1.5 py-0.5 bg-slate-200 rounded text-[11px] font-mono">Enter</kbd>
+                اختر الحرف المطابق للصوت ثم اضغط <kbd className="px-1.5 py-0.5 bg-slate-200 rounded text-[11px] font-mono">Enter</kbd>
               </p>
             )}
           </div>
@@ -295,7 +312,7 @@ export const InteractiveAudioExercisePlayer: React.FC<InteractiveAudioExercisePl
                     : 'bg-slate-200 text-slate-400 cursor-not-allowed'
                 }`}
               >
-                Check Answer
+                تحقق من الإجابة
               </button>
             ) : (
               <button
@@ -307,7 +324,7 @@ export const InteractiveAudioExercisePlayer: React.FC<InteractiveAudioExercisePl
                     : 'bg-rose-600 hover:bg-rose-700 shadow-rose-200'
                 }`}
               >
-                <span>Continue</span>
+                <span>التالي (Next)</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             )}
