@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase/client';
 import { Level, Unit, Lesson } from '@/types/database.types';
-import { CheckCircle, Play, Sparkles, Gift, ArrowLeft, ArrowRight, Layers, BookOpen } from 'lucide-react';
+import { CheckCircle, Play, Sparkles, Gift, ArrowLeft, ArrowRight, Layers, BookOpen, Clock, Lock } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 export default function LearnPage() {
@@ -12,6 +12,7 @@ export default function LearnPage() {
   const [levels, setLevels] = useState<Level[]>([]);
   const [units, setUnits] = useState<Unit[]>([]);
   const [lessons, setLessons] = useState<Lesson[]>([]);
+  const [selectedLevelId, setSelectedLevelId] = useState<string>('11111111-1111-1111-1111-111111111111');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -21,7 +22,10 @@ export default function LearnPage() {
         const { data: unts } = await supabase.from('units').select('*').order('order_index');
         const { data: les } = await supabase.from('lessons').select('*').order('order_index');
 
-        if (lvls) setLevels(lvls);
+        if (lvls && lvls.length > 0) {
+          setLevels(lvls);
+          setSelectedLevelId(lvls[0].id);
+        }
         if (unts) setUnits(unts);
         if (les) setLessons(les);
       } catch (err) {
@@ -35,9 +39,12 @@ export default function LearnPage() {
 
   const isRtl = dir === 'rtl';
 
+  const currentLevel = levels.find((l) => l.id === selectedLevelId) || levels[0];
+  const currentUnits = units.filter((u) => u.level_id === selectedLevelId);
+
   return (
     <div className="max-w-5xl mx-auto px-4 py-12" dir={dir}>
-      {/* Marketing & Curriculum Banner */}
+      {/* Top Curriculum Banner */}
       <div className="mb-10 text-center">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold mb-3 border border-emerald-200">
           <Gift className="w-4 h-4 text-emerald-600" />
@@ -57,60 +64,113 @@ export default function LearnPage() {
           <p className="text-sm font-arabic">{t('learn.loading')}</p>
         </div>
       ) : (
-        <div className="space-y-10">
-          {levels.map((level, lvlIdx) => {
-            const levelUnits = units.filter((u) => u.level_id === level.id);
-            const levelTitle = getLocalized(level, 'title');
-            const levelDesc = getLocalized(level, 'description');
+        <div className="space-y-8">
+          {/* Level Switcher Horizontal Tabs */}
+          <div className="bg-white p-2 rounded-2xl border border-slate-200 shadow-xs">
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+              {levels.map((lvl, idx) => {
+                const isActive = lvl.id === selectedLevelId;
+                const isBook1 = idx === 0;
 
-            return (
-              <div
-                key={level.id}
-                className="rounded-3xl p-6 sm:p-8 border shadow-xs bg-white border-emerald-200 ring-2 ring-emerald-500/10"
-              >
-                {/* Level Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-5 mb-6 gap-3">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-md font-mono">
-                        Stage {lvlIdx + 1}
+                return (
+                  <button
+                    key={lvl.id}
+                    onClick={() => setSelectedLevelId(lvl.id)}
+                    className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer ${
+                      isActive
+                        ? 'bg-emerald-600 text-white shadow-md shadow-emerald-200'
+                        : 'bg-slate-50 hover:bg-slate-100 text-slate-700'
+                    }`}
+                  >
+                    <span>الكتاب {idx + 1}</span>
+                    {isBook1 ? (
+                      <span
+                        className={`text-[10px] px-2 py-0.5 rounded-full font-black ${
+                          isActive ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-800'
+                        }`}
+                      >
+                        نشط ومتاح
                       </span>
-                      <span className="text-xs font-bold text-amber-800 bg-amber-100 px-2.5 py-0.5 rounded-md flex items-center gap-1">
-                        <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-                        <span>{t('learn.free_badge')}</span>
+                    ) : (
+                      <span
+                        className={`text-[10px] px-2 py-0.5 rounded-full ${
+                          isActive ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-500'
+                        }`}
+                      >
+                        قريباً
                       </span>
-                    </div>
-                    <h2 className="text-2xl font-bold text-slate-900 font-arabic">{levelTitle}</h2>
-                    <p className="text-sm text-slate-500 mt-1">{levelDesc}</p>
-                  </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
-                  <div>
-                    <span className="px-4 py-1.5 rounded-full bg-emerald-600 text-white text-xs font-bold shadow-xs flex items-center gap-1.5">
-                      <CheckCircle className="w-3.5 h-3.5" />
-                      <span>{t('learn.free_status')}</span>
+          {/* Active Level Header & Content */}
+          {currentLevel && (
+            <div>
+              {/* Level Info Banner */}
+              <div className="rounded-3xl p-6 sm:p-8 bg-gradient-to-r from-emerald-900 via-emerald-800 to-slate-900 text-white shadow-xl mb-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xs font-mono font-bold uppercase tracking-wider text-amber-300 bg-amber-400/20 px-3 py-1 rounded-full">
+                      سلسلة التحفة الأزهرية
+                    </span>
+                    <span className="text-xs font-bold text-emerald-200 bg-emerald-700/50 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>{t('learn.free_badge')}</span>
                     </span>
                   </div>
+                  <h2 className="text-2xl sm:text-3xl font-extrabold font-arabic">
+                    {getLocalized(currentLevel, 'title')}
+                  </h2>
+                  <p className="text-xs sm:text-sm text-emerald-100/90 mt-2 max-w-2xl leading-relaxed">
+                    {getLocalized(currentLevel, 'description')}
+                  </p>
                 </div>
 
-                {/* Units List */}
+                <div className="shrink-0 flex md:flex-col items-center md:items-end justify-between">
+                  <span className="px-4 py-2 rounded-full bg-emerald-500 text-slate-950 font-black text-xs shadow-md flex items-center gap-1.5">
+                    <CheckCircle className="w-4 h-4" />
+                    <span>مفتوح مجاناً 100%</span>
+                  </span>
+                  <span className="text-xs text-emerald-200/80 mt-2 hidden md:block">
+                    {currentUnits.length} وحدات منظمة
+                  </span>
+                </div>
+              </div>
+
+              {/* Units List */}
+              {currentUnits.length > 0 ? (
                 <div className="space-y-6">
-                  {levelUnits.map((unit) => {
+                  {currentUnits.map((unit, uIdx) => {
                     const unitLessons = lessons.filter((l) => l.unit_id === unit.id);
                     const unitTitle = getLocalized(unit, 'title');
                     const unitDesc = getLocalized(unit, 'description');
 
                     return (
-                      <div key={unit.id} className="p-5 sm:p-6 rounded-2xl bg-slate-50 border border-slate-200/80">
-                        <div className="flex items-center justify-between mb-2">
-                          <h3 className="font-bold text-slate-900 text-base sm:text-lg font-arabic">{unitTitle}</h3>
-                          <span className="text-[11px] font-bold text-emerald-700 bg-emerald-100/80 px-2.5 py-0.5 rounded-full">
-                            {t('learn.trial_label')}
+                      <div
+                        key={unit.id}
+                        className="p-6 sm:p-7 rounded-3xl bg-white border border-slate-200 shadow-sm hover:border-emerald-300 transition-all"
+                      >
+                        {/* Unit Title and Badge */}
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-4 mb-5 gap-2">
+                          <div>
+                            <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-md uppercase tracking-wider block mb-1">
+                              المسار {uIdx + 1}
+                            </span>
+                            <h3 className="font-extrabold text-slate-900 text-lg sm:text-xl font-arabic">
+                              {unitTitle}
+                            </h3>
+                            <p className="text-xs text-slate-500 mt-1 leading-relaxed">{unitDesc}</p>
+                          </div>
+                          <span className="self-start sm:self-center text-xs font-bold text-emerald-800 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100 shrink-0">
+                            {unitLessons.length} دروس
                           </span>
                         </div>
-                        <p className="text-xs text-slate-500 mb-5 leading-relaxed">{unitDesc}</p>
 
                         {/* Lessons Grid */}
-                        <div className="grid sm:grid-cols-2 gap-3.5">
+                        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
                           {unitLessons.map((lesson) => {
                             const lessonTitle = getLocalized(lesson, 'title');
 
@@ -118,25 +178,26 @@ export default function LearnPage() {
                               <Link
                                 key={lesson.id}
                                 href={`/learn/session?lessonId=${lesson.id}`}
-                                className="p-4 rounded-xl bg-white border border-slate-200 hover:border-emerald-500 hover:shadow-md transition-all flex items-center justify-between group cursor-pointer"
+                                className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 hover:border-emerald-500 hover:bg-white hover:shadow-md transition-all flex flex-col justify-between group cursor-pointer"
                               >
-                                <div className="flex items-center gap-3">
-                                  <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs group-hover:bg-emerald-600 group-hover:text-white transition-colors shrink-0">
-                                    <Play className="w-4 h-4 fill-current" />
-                                  </div>
-                                  <div>
-                                    <h4 className="font-bold text-slate-800 text-sm group-hover:text-emerald-700 transition-colors font-arabic">
-                                      {lessonTitle}
-                                    </h4>
-                                    <span className="text-[11px] text-slate-400 font-medium">
-                                      {t('learn.xp_reward', { count: lesson.xp_reward })}
+                                <div>
+                                  <div className="flex items-center justify-between mb-3">
+                                    <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                                      <Play className="w-3.5 h-3.5 fill-current" />
+                                    </div>
+                                    <span className="text-[10px] font-bold text-slate-400 font-mono">
+                                      +{lesson.xp_reward} XP
                                     </span>
                                   </div>
+
+                                  <h4 className="font-bold text-slate-800 text-xs sm:text-sm group-hover:text-emerald-700 transition-colors font-arabic leading-snug mb-2">
+                                    {lessonTitle}
+                                  </h4>
                                 </div>
 
-                                <div className="flex items-center gap-1 text-emerald-600 text-xs font-bold group-hover:translate-x-[-3px] transition-transform">
-                                  <span className="hidden sm:inline">{t('learn.start_lesson')}</span>
-                                  {isRtl ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
+                                <div className="mt-3 pt-2 border-t border-slate-200/60 flex items-center justify-between text-[11px] font-bold text-emerald-700 group-hover:translate-x-[-2px] transition-transform">
+                                  <span>{t('learn.start_lesson')}</span>
+                                  {isRtl ? <ArrowLeft className="w-3.5 h-3.5" /> : <ArrowRight className="w-3.5 h-3.5" />}
                                 </div>
                               </Link>
                             );
@@ -146,9 +207,28 @@ export default function LearnPage() {
                     );
                   })}
                 </div>
-              </div>
-            );
-          })}
+              ) : (
+                /* Empty state for upcoming levels */
+                <div className="p-12 text-center rounded-3xl bg-white border border-slate-200 shadow-sm">
+                  <div className="w-16 h-16 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-4">
+                    <Clock className="w-8 h-8" />
+                  </div>
+                  <h3 className="text-xl font-bold text-slate-800 font-arabic">
+                    {getLocalized(currentLevel, 'title')} — قريباً
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-500 mt-2 max-w-md mx-auto leading-relaxed">
+                    يجري حالياً تنسيق وإعداد دروس هذا الكتاب بالكامل ليكون متاحاً لجميع الطلاب قريباً.
+                  </p>
+                  <button
+                    onClick={() => setSelectedLevelId('11111111-1111-1111-1111-111111111111')}
+                    className="mt-6 px-6 py-2.5 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-700 transition-colors cursor-pointer"
+                  >
+                    العودة للكتاب الأول (المتاح حالياً)
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>

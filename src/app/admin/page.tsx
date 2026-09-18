@@ -51,10 +51,10 @@ const BUILT_IN_LETTER_PRESETS = [
   { label: 'حرف الكاف (ك - Kaaf)', url: '/audio/letters/kaaf.mp3' },
   { label: 'حرف الميم (م - Meem)', url: '/audio/letters/meem.mp3' },
   { label: 'حرف النون (ن - Noon)', url: '/audio/letters/noon.mp3' },
-  { label: 'حوار 1: السَّلامُ عَلَيْكُمْ (العربية بين يديك)', url: '/audio/bayna-yadayk/salam_intro.mp3' },
-  { label: 'حوار 2: كَيْفَ حَالُك (العربية بين يديك)', url: '/audio/bayna-yadayk/kayfa_haluk.mp3' },
-  { label: 'حوار 3: مِنْ أَيْنَ أَنْتَ (العربية بين يديك)', url: '/audio/bayna-yadayk/min_ayna_anta.mp3' },
-  { label: 'حوار 4: شَجَرَةُ الأُسْرَة (العربية بين يديك)', url: '/audio/bayna-yadayk/shajarat_usrah.mp3' },
+  { label: 'حوار 1: السَّلامُ عَلَيْكُمْ (التحفة الأزهرية ص 18)', url: '/audio/tuhfa/salam_full.mp3' },
+  { label: 'حوار 2: لِمَاذَا جِئْتَ إِلَى مِصْرَ؟ (التحفة الأزهرية ص 18)', url: '/audio/tuhfa/limadha_jita.mp3' },
+  { label: 'حوار 3: بِلَادٌ وَجِنْسِيَّاتٌ (التحفة الأزهرية ص 18)', url: '/audio/tuhfa/bilad.mp3' },
+  { label: 'حوار 4: أُسْرَةُ تَامِرٍ (التحفة الأزهرية ص 28)', url: '/audio/tuhfa/shajarat_usrah.mp3' },
 ];
 
 export default function AdminLTEPage() {
@@ -536,7 +536,7 @@ export default function AdminLTEPage() {
                 <div>
                   <h2 className="text-2xl font-black text-slate-900 font-arabic">لوحة التحكم والمتابعة</h2>
                   <p className="text-xs text-slate-500 mt-1">
-                    نظام إدارة منهج (العربية بين يديك) المتكامل مع دعم اللغات الثلاث (العربية - الإنجليزية - الروسية)
+                    نظام إدارة سلسلة (التحفة الأزهرية) المتكامل مع دعم اللغات الثلاث (العربية - الإنجليزية - الروسية)
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -552,7 +552,7 @@ export default function AdminLTEPage() {
                 <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
                   <span className="text-xs text-slate-500 font-medium">الكتب والمستويات</span>
                   <p className="text-3xl font-black text-slate-900 mt-1">{levels.length}</p>
-                  <span className="text-[11px] text-emerald-600 font-bold mt-1 block">العربية بين يديك</span>
+                  <span className="text-[11px] text-emerald-600 font-bold mt-1 block">التحفة الأزهرية</span>
                 </div>
                 <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
                   <span className="text-xs text-slate-500 font-medium">الوحدات الدراسية</span>
@@ -621,7 +621,7 @@ export default function AdminLTEPage() {
               <div className="border-b pb-4 flex items-center justify-between">
                 <div>
                   <h3 className="text-xl font-bold text-slate-900 font-arabic">شجرة المنهج المعتمد والترجمات</h3>
-                  <p className="text-xs text-slate-500 mt-1">تصفح المستويات والوحدات والدروس وفق كتاب العربية بين يديك</p>
+                  <p className="text-xs text-slate-500 mt-1">تصفح المستويات والوحدات والدروس وفق سلسلة التحفة الأزهرية</p>
                 </div>
                 <button
                   type="button"
@@ -787,7 +787,7 @@ export default function AdminLTEPage() {
                   {/* Audio Presets Helper */}
                   <div className="mt-4 pt-4 border-t border-slate-100">
                     <label className="block text-xs font-bold text-slate-600 mb-2">
-                      اختر نموذج صوتي جاهز (حوارات العربية بين يديك أو حروف الهجاء):
+                      اختر نموذج صوتي جاهز (حوارات التحفة الأزهرية أو حروف الهجاء):
                     </label>
                     <div className="flex flex-wrap gap-2">
                       {BUILT_IN_LETTER_PRESETS.map((p) => (
@@ -1301,7 +1301,7 @@ export default function AdminLTEPage() {
                       value={levelSlug}
                       onChange={(e) => setLevelSlug(e.target.value)}
                       required
-                      placeholder="bayna-yadayk-1"
+                      placeholder="tuhfa-book-1"
                       className="w-full p-2.5 rounded-xl border border-slate-200 text-xs font-mono"
                     />
                   </div>
