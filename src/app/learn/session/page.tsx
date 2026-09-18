@@ -6,7 +6,8 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase/client';
 import { Lesson, Exercise } from '@/types/database.types';
 import { InteractiveAudioExercisePlayer } from '@/components/audio/InteractiveAudioExercisePlayer';
-import { Trophy, RotateCcw, CheckCircle } from 'lucide-react';
+import { InteractiveAlphabetChart } from '@/components/reading/InteractiveAlphabetChart';
+import { Trophy, RotateCcw, CheckCircle, BookOpen, HelpCircle } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 
@@ -20,6 +21,7 @@ function LessonSessionContent() {
   const [currentExerciseIdx, setCurrentExerciseIdx] = useState(0);
   const [loading, setLoading] = useState(true);
   const [completed, setCompleted] = useState(false);
+  const [alphabetMode, setAlphabetMode] = useState<'chart' | 'quiz'>('quiz');
 
   useEffect(() => {
     async function loadLessonData() {
@@ -45,19 +47,12 @@ function LessonSessionContent() {
           }
         }
 
-        // If no exercises found in DB for this specific lesson, fallback to first available exercises in DB
-        if (exerciseList.length === 0) {
-          const { data: anyExs } = await supabase
-            .from('exercises')
-            .select('*')
-            .order('order_index')
-            .limit(3);
-          if (anyExs && anyExs.length > 0) {
-            exerciseList = anyExs;
+        if (currentLesson) {
+          setLesson(currentLesson);
+          if (currentLesson.lesson_type === 'alphabet') {
+            setAlphabetMode('chart');
           }
         }
-
-        if (currentLesson) setLesson(currentLesson);
         setExercises(exerciseList);
       } catch (err) {
         console.error('Error fetching lesson:', err);
@@ -139,8 +134,53 @@ function LessonSessionContent() {
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-4xl w-full mx-auto px-4 py-8 flex flex-col justify-center">
-        {!completed && currentExercise ? (
+      <main className="flex-1 max-w-5xl w-full mx-auto px-4 py-8 flex flex-col justify-center">
+        {lesson?.lesson_type === 'alphabet' && !completed && (
+          <div className="flex items-center justify-center gap-2 mb-6">
+            <button
+              type="button"
+              onClick={() => setAlphabetMode('chart')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                alphabetMode === 'chart'
+                  ? 'bg-emerald-600 text-white shadow-sm'
+                  : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+              }`}
+            >
+              <BookOpen className="w-3.5 h-3.5" />
+              <span>لوحة الحروف ونطقها الصوتي</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setAlphabetMode('quiz')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                alphabetMode === 'quiz'
+                  ? 'bg-emerald-600 text-white shadow-sm'
+                  : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+              }`}
+            >
+              <HelpCircle className="w-3.5 h-3.5" />
+              <span>تمارين واختبار الحروف ({exercises.length})</span>
+            </button>
+          </div>
+        )}
+
+        {lesson?.lesson_type === 'alphabet' && alphabetMode === 'chart' && !completed ? (
+          <div className="space-y-6">
+            <InteractiveAlphabetChart />
+            {exercises.length > 0 && (
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => setAlphabetMode('quiz')}
+                  className="px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition-all cursor-pointer inline-flex items-center gap-2"
+                >
+                  <HelpCircle className="w-4 h-4" />
+                  <span>ابدأ اختبار الحروف ومخارج الأصوات الآن ({exercises.length} أسئلة)</span>
+                </button>
+              </div>
+            )}
+          </div>
+        ) : !completed && currentExercise ? (
           <div>
             <div className="text-center mb-6">
               <span className="text-xs font-bold uppercase tracking-wider text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full">
@@ -166,7 +206,7 @@ function LessonSessionContent() {
             </div>
 
             <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full">
-              Bayna Yadayk • Book 1
+              سلسلة التحفة الأزهرية • الكتاب الأول
             </span>
 
             <h2 className="text-2xl font-black text-slate-900 font-arabic mt-3">
@@ -180,7 +220,7 @@ function LessonSessionContent() {
             <div className="my-6 p-4 rounded-2xl bg-amber-50 border border-amber-200/80 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Trophy className="w-5 h-5 text-amber-500" />
-                <span className="text-xs font-bold text-amber-900">مكافأة إتقان الحوار</span>
+                <span className="text-xs font-bold text-amber-900">مكافأة إتقان الدرس</span>
               </div>
               <span className="font-extrabold text-amber-700 text-sm">+{lesson?.xp_reward || 35} XP</span>
             </div>
